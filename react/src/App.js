@@ -2,8 +2,15 @@ import './App.css';
 
 function App() {
   return (
-    <div>
-      <h1>Hello World</h1>
+    <div className="app">
+      <header className="header">
+        <h1>dodgedash.io</h1>
+        <nav className="nav">
+          <button>Quick Play</button>
+          <button>Server List</button>
+          <button>How to Play</button>
+        </nav>
+      </header>
     </div>
   );
 }

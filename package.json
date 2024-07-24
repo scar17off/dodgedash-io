@@ -14,7 +14,17 @@
 		"build": "cd react && npm run build",
 		"dev": "concurrently \"cd react && npm run start\" \"nodemon index.js\""
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC"
+	"keywords": [
+    "dodgedash",
+    "multiplayer",
+    "game",
+    "nodejs",
+    "javascript",
+    "react",
+    "socket.io",
+    "express",
+    "sqlite3"
+  ],
+	"author": "scar17off",
+	"license": "MIT"
 }

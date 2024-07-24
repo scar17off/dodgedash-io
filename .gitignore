@@ -3,3 +3,6 @@ package-lock.json
 .env
 static/
 public/
+.cursorignore
+.vscode/
+react/.gitignore

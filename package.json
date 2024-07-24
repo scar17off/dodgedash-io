@@ -1,0 +1,20 @@
+{
+	"dependencies": {
+		"concurrently": "^8.2.2",
+		"express": "^4.19.2",
+		"socket.io": "^4.7.5",
+		"sqlite3": "^5.1.7"
+	},
+	"name": "dodgedash-io",
+	"description": "Welcome to DodgeDash.io, an exciting game where you navigate through various areas, evade enemies, and save players to help them progress!",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"build": "cd react && npm run build",
+		"dev": "concurrently \"cd react && npm run start\" \"nodemon index.js\""
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}

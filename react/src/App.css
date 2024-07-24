@@ -1,23 +1,22 @@
 body {
-	margin: 0;
-	background-color: #222;
+  margin: 0;
+  background-color: #222;
 }
 
 .app {
-	color: white;
-	text-align: center;
-	padding: 20px;
+  color: white;
+  text-align: center;
 }
 
 .header {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .nav button {
-	margin: 5px;
-	padding: 10px 20px;
-	background-color: blue;
-	color: white;
-	border: none;
-	cursor: pointer;
+  margin: 5px;
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  cursor: pointer;
 }

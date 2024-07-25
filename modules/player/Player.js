@@ -6,7 +6,7 @@ class Player {
     this.socket = socket;
     this.position = this.getRandomSpawnPosition(area);
     this.radius = 15;
-    this.speed = 5 / 5;
+    this.speed = 5 / 3;
     this._heroType = heroType[0].id;
     this.color = heroType[0].color;
     this.input = {

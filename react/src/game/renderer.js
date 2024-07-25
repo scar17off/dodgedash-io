@@ -48,10 +48,13 @@ class Renderer {
   }
 
   render(gameState, options = { grid: false }) {
+    const { width, height } = this.camera;
     this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, this.camera.width, this.camera.height);
+    this.context.fillRect(0, 0, width, height);
+    
     this.context.save();
     this.camera.applyTo(this.context);
+    
     if (gameState.area) {
       this.renderArea(gameState.area, options);
     }
@@ -65,6 +68,7 @@ class Renderer {
         }
       }
     }
+    
     this.context.restore();
   }
 }

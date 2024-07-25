@@ -9,13 +9,21 @@ class Renderer {
       return;
     }
 
+    // Draw border
     this.context.strokeStyle = 'white';
     this.context.lineWidth = 2;
-
-    // Draw border
     this.context.beginPath();
     this.context.rect(area.position.x, area.position.y, area.size.width, area.size.height);
     this.context.stroke();
+
+    // Draw start zone
+    this.context.fillStyle = 'rgba(255, 255, 0, 0.5)';
+    this.context.fillRect(
+      area.startZone.position.x,
+      area.startZone.position.y,
+      area.startZone.size.width,
+      area.startZone.size.height
+    );
 
     // Draw grid if option is enabled
     if (options.grid) {

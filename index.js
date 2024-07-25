@@ -8,6 +8,7 @@ const config = require("./config.json");
 
 const Player = require("./modules/player/Player");
 const Area = require("./modules/Area");
+const { isWithinBorderOrStartZone } = require("./modules/utils");
 
 const app = express();
 app.use(cors());
@@ -45,7 +46,7 @@ server.areas.push(mainArea);
 
 io.on("connection", socket => {
   console.log("Client connected");
-  const player = new Player(socket, mainArea);
+  const player = new Player(socket, "Main Region", 1);
   
   socket.on('spawn', ({ nickname, hero }) => {
     player.name = nickname;
@@ -53,16 +54,16 @@ io.on("connection", socket => {
     server.clients.push(player);
     mainArea.players.push(player);
     
-    // Send area data to the client
+    player.position = player.getRandomSpawnPosition(mainArea);
+    
     socket.emit('areaData', mainArea.getAreaData());
 
-    // Send player data to the client
     const playerData = {
       id: player.id,
       x: player.position.x,
       y: player.position.y,
       radius: player.radius,
-      speed: player.speed,
+      speed: player.baseSpeed,
       color: player.color,
       name: player.name
     };
@@ -92,12 +93,12 @@ app.get("/protocol", (req, res) => {
 
 const gameLoop = () => {
   for (const client of server.clients) {
-    client.update();
+    client.update(mainArea);
     const playerData = {
       x: client.position.x,
       y: client.position.y,
       radius: client.radius,
-      speed: client.speed,
+      speed: client.isInStartZone(mainArea) ? 10 : client.baseSpeed,
       color: client.color,
       name: client.name
     };

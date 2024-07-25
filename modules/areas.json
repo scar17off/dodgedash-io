@@ -15,8 +15,16 @@
           {
             "type": "Normal",
             "amount": 5,
-            "speed": 1.6666666666666667,
-            "radius": 10
+            "speed": 1.75,
+            "radius": 10,
+            "position": "random"
+          },
+          {
+            "type": "Wall",
+            "amount": 5,
+            "speed": 2,
+            "radius": 20,
+            "position": "wall"
           }
         ]
       },
@@ -30,7 +38,7 @@
           {
             "type": "Normal",
             "amount": 15,
-            "speed": 1.6666666666666667,
+            "speed": 2,
             "radius": 10
           }
         ]

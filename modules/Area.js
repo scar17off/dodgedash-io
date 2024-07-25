@@ -1,4 +1,4 @@
-const Normal = require('./entities/Normal');
+const entityTypes = require('./entities/Enemies');
 
 class Area {
   constructor(data = {
@@ -42,24 +42,44 @@ class Area {
     if (!entityData) return;
     entityData.forEach(data => {
       const amount = data.amount || 1;
+      const EntityClass = entityTypes[data.type];
+
+      if (!EntityClass) {
+        console.warn(`Unknown entity type: ${data.type}`);
+        return;
+      }
+
       for (let i = 0; i < amount; i++) {
-        let entity;
-        switch (data.type) {
-          case 'Normal':
-            entity = new Normal();
-            if (data.speed) entity.speed = data.speed;
-            if (data.radius) entity.radius = data.radius;
-            break;
-          // Add cases for other entity types here
-        }
-        if (entity) {
-          if (data.position) {
-            entity.position = { ...data.position };
-          } else {
+        const entity = new EntityClass();
+
+        if (data.speed) entity.speed = data.speed;
+        if (data.radius) entity.radius = data.radius;
+
+        switch (data.position) {
+          case "random":
             entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
-          }
-          this.entities.push(entity);
+            break;
+          case "wall":
+            entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
+            break;
+          default:
+            if (typeof data.position === 'object' && 'x' in data.position && 'y' in data.position) {
+              entity.position = { ...data.position };
+            } else {
+              entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
+            }
+            break;
         }
+
+        // Initialize velocity if it's not set
+        if (!entity.velocity || (entity.velocity.x === 0 && entity.velocity.y === 0)) {
+          entity.velocity = {
+            x: (Math.random() - 0.5) * entity.speed,
+            y: (Math.random() - 0.5) * entity.speed
+          };
+        }
+
+        this.entities.push(entity);
       }
     });
   }

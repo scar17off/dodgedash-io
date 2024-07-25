@@ -102,6 +102,16 @@ io.on("connection", socket => {
     const index = server.clients.indexOf(player);
     if (index !== -1) {
       server.clients.splice(index, 1);
+      
+      // Remove player from the current area
+      const currentArea = areas[player.regionName][player.areaNumber];
+      const playerIndex = currentArea.players.indexOf(player);
+      if (playerIndex !== -1) {
+        currentArea.players.splice(playerIndex, 1);
+      }
+      
+      // Notify other players about the disconnection
+      io.to(player.regionName + '-' + player.areaNumber).emit('playerDisconnected', player.id);
     }
   });
 
@@ -150,6 +160,16 @@ io.on("connection", socket => {
         y: player.position.y,
         areaNumber: player.areaNumber
       });
+
+      // Send updated entity data for the new area
+      const entityData = newArea.entities.map(entity => ({
+        x: entity.position.x,
+        y: entity.position.y,
+        radius: entity.radius,
+        color: entity.color,
+        entityType: entity.entityType
+      }));
+      socket.emit('entityUpdate', entityData);
 
       socket.leave(player.regionName + '-' + player.areaNumber);
       socket.join(player.regionName + '-' + newAreaNumber);

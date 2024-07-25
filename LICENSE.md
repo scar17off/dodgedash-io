@@ -1,5 +1,7 @@
 MIT License
 
+Inspired by evades.io
+
 Copyright (c) 2024 scar17off
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

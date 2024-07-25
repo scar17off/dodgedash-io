@@ -11,7 +11,7 @@ const Game = ({ nickname, hero }) => {
   const rendererRef = useRef(null);
   const lastSentInputRef = useRef(null);
   const initialState = {
-    localPlayer: { x: 0, y: 0, speed: 5, radius: 25, name: nickname },
+    localPlayer: { x: 0, y: 0, speed: 0, radius: 0, name: nickname },
     players: [],
     entities: [],
     area: null
@@ -117,6 +117,13 @@ const Game = ({ nickname, hero }) => {
       }));
     });
 
+    socket.on('playerDisconnected', (playerId) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: prevState.players.filter(p => p.id !== playerId)
+      }));
+    });
+
     const gameLoop = () => {
       const { mouse, keys, mouseMovement } = controlsRef.current;
       const currentInput = { keys, mouseMovement, mouse };
@@ -149,6 +156,7 @@ const Game = ({ nickname, hero }) => {
       socket.off('newPlayer');
       socket.off('existingPlayers');
       socket.off('playerMove');
+      socket.off('playerDisconnected');
     };
   }, [nickname, hero, updateGameState]);
 

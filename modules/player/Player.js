@@ -7,7 +7,7 @@ class Player {
     this.socket = socket;
     this.position = { x: 0, y: 0 };
     this.radius = 15;
-    this.baseSpeed = 25 / 3;
+    this.baseSpeed = 8;
     this._heroType = heroType[0].id;
     this.color = heroType[0].color;
     this.input = {

@@ -87,14 +87,20 @@ class Area {
   getRandomPositionOutsideStartZone(entityRadius) {
     const margin = entityRadius;
     let x, y;
+    const isWithinZone = (zone) => {
+      if(!zone) return false;
+      return x >= zone.position.x && x <= zone.position.x + zone.size.width &&
+      y >= zone.position.y && y <= zone.position.y + zone.size.height;
+    }
+
     do {
       x = this.position.x + margin + Math.random() * (this.size.width - 2 * margin);
       y = this.position.y + margin + Math.random() * (this.size.height - 2 * margin);
     } while (
-      x >= this.startZone.position.x &&
-      x <= this.startZone.position.x + this.startZone.size.width &&
-      y >= this.startZone.position.y &&
-      y <= this.startZone.position.y + this.startZone.size.height
+      isWithinZone(this.startZone) ||
+      isWithinZone(this.safeZone) ||
+      isWithinZone(this.previousAreaZone) ||
+      isWithinZone(this.finishZone)
     );
     return { x, y };
   }

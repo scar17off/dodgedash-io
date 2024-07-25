@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
 import Game from './game/Game';
-import Editor from './editor/Editor';
 import HeroSelect from './game/HeroSelect';
 
 function App() {
@@ -26,8 +25,6 @@ function App() {
     <div className="app">
       {gameState === 'game' ? (
         <Game nickname={nickname} hero={selectedHero} />
-      ) : gameState === 'editor' ? (
-        <Editor />
       ) : gameState === 'heroSelect' ? (
         <HeroSelect nickname={nickname} onHeroSelect={handleHeroSelect} />
       ) : (
@@ -42,7 +39,6 @@ function App() {
           />
           <nav className="nav">
             <button onClick={handlePlay}>Play</button>
-            <button onClick={() => setGameState('editor')}>Editor</button>
           </nav>
         </header>
       )}

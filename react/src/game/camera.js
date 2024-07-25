@@ -20,7 +20,6 @@ class Camera {
     this.targetY = playerY;
     this.x = this.targetX - this.width / 2;
     this.y = this.targetY - this.height / 2;
-    console.log('Camera updated:', this.x, this.y);
   }
 
   applyTo(context) {

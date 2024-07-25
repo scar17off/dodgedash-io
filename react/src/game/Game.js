@@ -90,8 +90,26 @@ const Game = ({ nickname, hero }) => {
       updateGameState(prevState => ({ ...prevState, entities: entityData }));
     });
 
-    socket.on('changeArea', (direction) => {
-      socket.emit('changeArea', direction);
+    socket.on('areaChanged', ({ areaData, playerUpdate }) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        area: areaData,
+        localPlayer: { ...prevState.localPlayer, ...playerUpdate }
+      }));
+    });
+
+    socket.on('playerLeft', (playerId) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: prevState.players.filter(p => p.id !== playerId)
+      }));
+    });
+
+    socket.on('playerJoined', (playerData) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: [...prevState.players, playerData]
+      }));
     });
 
     socket.on('newPlayer', (playerData) => {
@@ -153,6 +171,9 @@ const Game = ({ nickname, hero }) => {
       socket.off('playerData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');
+      socket.off('areaChanged');
+      socket.off('playerLeft');
+      socket.off('playerJoined');
       socket.off('newPlayer');
       socket.off('existingPlayers');
       socket.off('playerMove');

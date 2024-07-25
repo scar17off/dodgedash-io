@@ -114,75 +114,6 @@ io.on("connection", socket => {
       io.to(player.regionName + '-' + player.areaNumber).emit('playerDisconnected', player.id);
     }
   });
-
-  socket.on('changeArea', (direction) => {
-    const currentRegion = areas[player.regionName];
-    let newAreaNumber = player.areaNumber;
-
-    if (direction === 'next' && player.areaNumber < currentRegion.length - 1) {
-      newAreaNumber++;
-    } else if (direction === 'previous' && player.areaNumber > 0) {
-      newAreaNumber--;
-    }
-
-    if (newAreaNumber !== player.areaNumber) {
-      const currentArea = currentRegion[player.areaNumber];
-      const playerIndex = currentArea.players.indexOf(player);
-      if (playerIndex !== -1) {
-        currentArea.players.splice(playerIndex, 1);
-      }
-
-      player.areaNumber = newAreaNumber;
-
-      const newArea = currentRegion[newAreaNumber];
-      newArea.players.push(player);
-
-      const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
-
-      const teleportZoneWidth = 50;
-      const safeDistance = teleportZoneWidth + player.radius;
-
-      if (direction === 'next') {
-        player.position = {
-          x: newArea.position.x + safeDistance,
-          y: newArea.position.y + (relativeY * newArea.size.height)
-        };
-      } else if (direction === 'previous') {
-        player.position = {
-          x: newArea.position.x + newArea.size.width - safeDistance,
-          y: newArea.position.y + (relativeY * newArea.size.height)
-        };
-      }
-
-      socket.emit('areaData', newArea.getAreaData());
-      socket.emit('playerUpdate', {
-        x: player.position.x,
-        y: player.position.y,
-        areaNumber: player.areaNumber
-      });
-
-      // Send updated entity data for the new area
-      const entityData = newArea.entities.map(entity => ({
-        x: entity.position.x,
-        y: entity.position.y,
-        radius: entity.radius,
-        color: entity.color,
-        entityType: entity.entityType
-      }));
-      socket.emit('entityUpdate', entityData);
-
-      socket.leave(player.regionName + '-' + player.areaNumber);
-      socket.join(player.regionName + '-' + newAreaNumber);
-    }
-  });
-});
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
-
-app.get("/protocol", (req, res) => {
-  res.sendFile(__dirname + "/modules/protocol.json");
 });
 
 const gameLoop = () => {
@@ -203,9 +134,9 @@ const gameLoop = () => {
         player.socket.to(area.regionName + '-' + area.areaNumber).emit('playerMove', playerData);
         
         if (player.isInFinishZone(area)) {
-          player.socket.emit('changeArea', 'next');
+          changePlayerArea(player, 'next');
         } else if (area.previousAreaZone && player.isInPreviousAreaZone(area)) {
-          player.socket.emit('changeArea', 'previous');
+          changePlayerArea(player, 'previous');
         }
       }
 
@@ -229,6 +160,82 @@ const gameLoop = () => {
 
   setTimeout(gameLoop, 1000 / config.fps);
 };
+
+function changePlayerArea(player, direction) {
+  const currentRegion = areas[player.regionName];
+  let newAreaNumber = player.areaNumber;
+
+  if (direction === 'next' && player.areaNumber < currentRegion.length - 1) {
+    newAreaNumber++;
+  } else if (direction === 'previous' && player.areaNumber > 0) {
+    newAreaNumber--;
+  }
+
+  if (newAreaNumber !== player.areaNumber) {
+    const currentArea = currentRegion[player.areaNumber];
+    const playerIndex = currentArea.players.indexOf(player);
+    if (playerIndex !== -1) {
+      currentArea.players.splice(playerIndex, 1);
+    }
+
+    player.areaNumber = newAreaNumber;
+
+    const newArea = currentRegion[newAreaNumber];
+    newArea.players.push(player);
+
+    const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
+
+    const teleportZoneWidth = 50;
+    const safeDistance = teleportZoneWidth + player.radius;
+
+    if (direction === 'next') {
+      player.position = {
+        x: newArea.position.x + safeDistance,
+        y: newArea.position.y + (relativeY * newArea.size.height)
+      };
+    } else if (direction === 'previous') {
+      player.position = {
+        x: newArea.position.x + newArea.size.width - safeDistance,
+        y: newArea.position.y + (relativeY * newArea.size.height)
+      };
+    }
+
+    player.socket.emit('areaChanged', {
+      areaData: newArea.getAreaData(),
+      playerUpdate: {
+        x: player.position.x,
+        y: player.position.y,
+        areaNumber: player.areaNumber
+      }
+    });
+
+    // Send updated entity data for the new area
+    const entityData = newArea.entities.map(entity => ({
+      x: entity.position.x,
+      y: entity.position.y,
+      radius: entity.radius,
+      color: entity.color,
+      entityType: entity.entityType
+    }));
+    player.socket.emit('entityUpdate', entityData);
+
+    player.socket.leave(player.regionName + '-' + currentArea.areaNumber);
+    player.socket.join(player.regionName + '-' + newAreaNumber);
+
+    // Notify other players about the player leaving and joining
+    player.socket.to(player.regionName + '-' + currentArea.areaNumber).emit('playerLeft', player.id);
+    player.socket.to(player.regionName + '-' + newAreaNumber).emit('playerJoined', {
+      id: player.id,
+      x: player.position.x,
+      y: player.position.y,
+      radius: player.radius,
+      speed: player.baseSpeed,
+      color: player.color,
+      name: player.name
+    });
+  }
+}
+
 gameLoop();
 
 httpServer.listen(443, () => {

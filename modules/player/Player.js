@@ -7,7 +7,7 @@ class Player {
     this.socket = socket;
     this.position = { x: 0, y: 0 };
     this.radius = 15;
-    this.baseSpeed = 5 / 3;
+    this.baseSpeed = 25 / 3;
     this._heroType = heroType[0].id;
     this.color = heroType[0].color;
     this.input = {
@@ -47,7 +47,7 @@ class Player {
     this.input = input;
   }
 
-  update(area) {
+  update(area, deltaTime) {
     const { mouse, keys, mouseMovement } = this.input;
     let newPosition = { ...this.position };
     const speed = this.isInStartZone(area) ? 10 : this.baseSpeed;
@@ -102,6 +102,27 @@ class Player {
       this.position.x <= area.startZone.position.x + area.startZone.size.width &&
       this.position.y >= area.startZone.position.y &&
       this.position.y <= area.startZone.position.y + area.startZone.size.height
+    );
+  }
+
+  isInFinishZone(area) {
+    return (
+      this.position.x >= area.finishZone.position.x &&
+      this.position.x <= area.finishZone.position.x + area.finishZone.size.width &&
+      this.position.y >= area.finishZone.position.y &&
+      this.position.y <= area.finishZone.position.y + area.finishZone.size.height
+    );
+  }
+
+  isInPreviousAreaZone(area) {
+    if (!area.previousAreaZone) {
+      return false;
+    }
+    return (
+      this.position.x >= area.previousAreaZone.position.x &&
+      this.position.x <= area.previousAreaZone.position.x + area.previousAreaZone.size.width &&
+      this.position.y >= area.previousAreaZone.position.y &&
+      this.position.y <= area.previousAreaZone.position.y + area.previousAreaZone.size.height
     );
   }
 }

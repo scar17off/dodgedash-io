@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { setupControls } from './controls';
 import socket from './network';
 import Camera from './camera';
@@ -9,12 +9,24 @@ const Game = ({ nickname, hero }) => {
   const controlsRef = useRef(null);
   const cameraRef = useRef(null);
   const rendererRef = useRef(null);
-  const [gameState, setGameState] = useState({
+  const lastSentInputRef = useRef(null);
+  const initialState = {
     localPlayer: { x: 0, y: 0, speed: 5, radius: 25, name: nickname },
     players: [],
+    entities: [],
     area: null
-  });
-  const gameStateRef = useRef(gameState);
+  };
+  const gameStateRef = useRef(initialState);
+  const [gameState, setGameState] = useState(initialState);
+  const [areaDataReceived, setAreaDataReceived] = useState(false);
+
+  const updateGameState = useCallback((updater) => {
+    setGameState(prevState => {
+      const newState = updater(prevState);
+      gameStateRef.current = newState;
+      return newState;
+    });
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -56,28 +68,47 @@ const Game = ({ nickname, hero }) => {
     socket.emit('spawn', { nickname, hero });
 
     socket.on('areaData', (areaData) => {
-      setGameState(prevState => {
-        const newState = { ...prevState, area: areaData };
-        gameStateRef.current = newState;
-        return newState;
-      });
+      updateGameState(prevState => ({ ...prevState, area: areaData }));
+      setAreaDataReceived(true);
+    });
+
+    socket.on('playerData', (playerData) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        localPlayer: { ...prevState.localPlayer, ...playerData }
+      }));
     });
 
     socket.on('playerUpdate', (playerData) => {
-      setGameState(prevState => {
-        const newState = { ...prevState, localPlayer: { ...prevState.localPlayer, ...playerData } };
-        gameStateRef.current = newState;
-        return newState;
-      });
+      updateGameState(prevState => ({
+        ...prevState,
+        localPlayer: { ...prevState.localPlayer, ...playerData }
+      }));
+    });
+
+    socket.on('entityUpdate', (entityData) => {
+      updateGameState(prevState => ({ ...prevState, entities: entityData }));
+    });
+
+    socket.on('changeArea', (direction) => {
+      socket.emit('changeArea', direction);
     });
 
     const gameLoop = () => {
       const { mouse, keys, mouseMovement } = controlsRef.current;
+      const currentInput = { keys, mouseMovement, mouse };
 
-      socket.emit('playerInput', { mouse, keys, mouseMovement });
+      if (controlsRef.current.inputChanged || !isEqual(currentInput, lastSentInputRef.current)) {
+        socket.emit('playerInput', currentInput);
+        lastSentInputRef.current = JSON.parse(JSON.stringify(currentInput));
+        controlsRef.current.inputChanged = false;
+      }
 
-      cameraRef.current.update(gameStateRef.current.localPlayer.x, gameStateRef.current.localPlayer.y);
-      rendererRef.current.render(gameStateRef.current, { grid: true });
+      const currentGameState = gameStateRef.current || initialState;
+      if (currentGameState.localPlayer) {
+        cameraRef.current.update(currentGameState.localPlayer.x, currentGameState.localPlayer.y);
+      }
+      rendererRef.current.render(currentGameState, { grid: true });
 
       requestAnimationFrame(gameLoop);
     };
@@ -88,10 +119,18 @@ const Game = ({ nickname, hero }) => {
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
+      socket.off('areaData');
+      socket.off('playerData');
+      socket.off('playerUpdate');
+      socket.off('entityUpdate');
     };
-  }, [nickname, hero]);
+  }, [nickname, hero, updateGameState]);
 
   return <canvas ref={canvasRef} style={{ display: 'block' }} />;
 };
+
+function isEqual(obj1, obj2) {
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
+}
 
 export default Game;

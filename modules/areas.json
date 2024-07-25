@@ -1,0 +1,40 @@
+{
+  "Alpha": {
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "areas": {
+      "0": {
+        "background": "black",
+        "size": {
+          "width": 4000,
+          "height": 480
+        },
+        "entities": [
+          {
+            "type": "Normal",
+            "amount": 5,
+            "speed": 1.6666666666666667,
+            "radius": 10
+          }
+        ]
+      },
+      "1": {
+        "background": "black",
+        "size": {
+          "width": 4000,
+          "height": 480
+        },
+        "entities": [
+          {
+            "type": "Normal",
+            "amount": 15,
+            "speed": 1.6666666666666667,
+            "radius": 10
+          }
+        ]
+      }
+    }
+  }
+}

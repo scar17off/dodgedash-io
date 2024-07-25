@@ -18,14 +18,14 @@ class Camera {
   update(playerX, playerY) {
     this.targetX = playerX;
     this.targetY = playerY;
-    this.x = this.targetX - this.width / (2 * this.zoom);
-    this.y = this.targetY - this.height / (2 * this.zoom);
+    this.x = this.targetX - this.width / 2;
+    this.y = this.targetY - this.height / 2;
+    console.log('Camera updated:', this.x, this.y);
   }
 
   applyTo(context) {
-    context.save();
-    context.scale(this.zoom, this.zoom);
     context.translate(-this.x, -this.y);
+    context.scale(this.zoom, this.zoom);
   }
 
   zoomIn() {

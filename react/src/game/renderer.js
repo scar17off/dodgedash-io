@@ -25,6 +25,35 @@ class Renderer {
       area.startZone.size.height
     );
 
+    // Draw safe zone
+    this.context.fillStyle = 'rgba(255, 255, 0, 0.5)';
+    this.context.fillRect(
+      area.safeZone.position.x,
+      area.safeZone.position.y,
+      area.safeZone.size.width,
+      area.safeZone.size.height
+    );
+
+    // Draw finish zone
+    this.context.fillStyle = 'rgba(0, 255, 0, 0.5)';
+    this.context.fillRect(
+      area.finishZone.position.x,
+      area.finishZone.position.y,
+      area.finishZone.size.width,
+      area.finishZone.size.height
+    );
+
+    // Draw previous area zone if it exists
+    if (area.previousAreaZone) {
+      this.context.fillStyle = 'rgba(0, 0, 255, 0.5)';
+      this.context.fillRect(
+        area.previousAreaZone.position.x,
+        area.previousAreaZone.position.y,
+        area.previousAreaZone.size.width,
+        area.previousAreaZone.size.height
+      );
+    }
+
     // Draw grid if option is enabled
     if (options.grid) {
       this.context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -55,6 +84,13 @@ class Renderer {
     this.context.fill();
   }
 
+  renderEntity(entity) {
+    this.context.beginPath();
+    this.context.arc(entity.x, entity.y, entity.radius, 0, 2 * Math.PI);
+    this.context.fillStyle = entity.color;
+    this.context.fill();
+  }
+
   render(gameState, options = { grid: false }) {
     const { width, height } = this.camera;
     this.context.fillStyle = 'black';
@@ -63,13 +99,19 @@ class Renderer {
     this.context.save();
     this.camera.applyTo(this.context);
     
-    if (gameState.area) {
+    if (gameState && gameState.area) {
       this.renderArea(gameState.area, options);
     }
-    if (gameState.localPlayer) {
+    
+    if (gameState && gameState.entities && gameState.entities.length > 0) {
+      for (const entity of gameState.entities) {
+        this.renderEntity(entity);
+      }
+    }
+    if (gameState && gameState.localPlayer) {
       this.renderPlayer(gameState.localPlayer, true);
     }
-    if (gameState.players) {
+    if (gameState && gameState.players && gameState.players.length > 0) {
       for (const player of gameState.players) {
         if (player.id !== gameState.localPlayer?.id) {
           this.renderPlayer(player);

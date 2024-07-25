@@ -39,7 +39,6 @@ function copyProtocolToReact() {
 
 copyProtocolToReact();
 
-// Load areas from JSON file
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'areas.json'), 'utf8'));
 
 // Initialize areas
@@ -76,6 +75,23 @@ io.on("connection", socket => {
       name: player.name
     };
     socket.emit('playerData', playerData);
+
+    socket.broadcast.emit('newPlayer', playerData);
+
+    const existingPlayers = server.clients
+      .filter(p => p.id !== player.id)
+      .map(p => ({
+        id: p.id,
+        x: p.position.x,
+        y: p.position.y,
+        radius: p.radius,
+        speed: p.baseSpeed,
+        color: p.color,
+        name: p.name
+      }));
+    socket.emit('existingPlayers', existingPlayers);
+
+    socket.join(player.regionName + '-' + player.areaNumber);
   });
 
   socket.on('playerInput', (input) => {
@@ -100,25 +116,20 @@ io.on("connection", socket => {
     }
 
     if (newAreaNumber !== player.areaNumber) {
-      // Remove player from current area
       const currentArea = currentRegion[player.areaNumber];
       const playerIndex = currentArea.players.indexOf(player);
       if (playerIndex !== -1) {
         currentArea.players.splice(playerIndex, 1);
       }
 
-      // Update player's area number
       player.areaNumber = newAreaNumber;
 
-      // Add player to new area
       const newArea = currentRegion[newAreaNumber];
       newArea.players.push(player);
 
-      // Calculate the relative Y position
       const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
 
-      // Set player's new position
-      const teleportZoneWidth = 50; // Assuming the teleport zone width is 50
+      const teleportZoneWidth = 50;
       const safeDistance = teleportZoneWidth + player.radius;
 
       if (direction === 'next') {
@@ -133,13 +144,15 @@ io.on("connection", socket => {
         };
       }
 
-      // Send updated area data and player position to the client
       socket.emit('areaData', newArea.getAreaData());
       socket.emit('playerUpdate', {
         x: player.position.x,
         y: player.position.y,
         areaNumber: player.areaNumber
       });
+
+      socket.leave(player.regionName + '-' + player.areaNumber);
+      socket.join(player.regionName + '-' + newAreaNumber);
     }
   });
 });
@@ -158,6 +171,7 @@ const gameLoop = () => {
       for (const player of area.players) {
         player.update(area);
         const playerData = {
+          id: player.id,
           x: player.position.x,
           y: player.position.y,
           radius: player.radius,
@@ -166,7 +180,7 @@ const gameLoop = () => {
           name: player.name
         };
         player.socket.emit('playerUpdate', playerData);
-        player.socket.broadcast.emit('playerMove', { id: player.id, ...playerData });
+        player.socket.to(area.regionName + '-' + area.areaNumber).emit('playerMove', playerData);
         
         if (player.isInFinishZone(area)) {
           player.socket.emit('changeArea', 'next');
@@ -193,7 +207,7 @@ const gameLoop = () => {
     }
   }
 
-  setTimeout(gameLoop, 1000 / 60); // Run at 60 FPS
+  setTimeout(gameLoop, 1000 / config.fps);
 };
 gameLoop();
 

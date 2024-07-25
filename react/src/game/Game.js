@@ -94,6 +94,29 @@ const Game = ({ nickname, hero }) => {
       socket.emit('changeArea', direction);
     });
 
+    socket.on('newPlayer', (playerData) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: [...prevState.players, playerData]
+      }));
+    });
+
+    socket.on('existingPlayers', (players) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: players
+      }));
+    });
+
+    socket.on('playerMove', (playerData) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        players: prevState.players.map(p => 
+          p.id === playerData.id ? { ...p, ...playerData } : p
+        )
+      }));
+    });
+
     const gameLoop = () => {
       const { mouse, keys, mouseMovement } = controlsRef.current;
       const currentInput = { keys, mouseMovement, mouse };
@@ -123,6 +146,9 @@ const Game = ({ nickname, hero }) => {
       socket.off('playerData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');
+      socket.off('newPlayer');
+      socket.off('existingPlayers');
+      socket.off('playerMove');
     };
   }, [nickname, hero, updateGameState]);
 

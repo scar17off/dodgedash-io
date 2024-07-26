@@ -1,4 +1,6 @@
 module.exports = {
   Normal: require('./Normal'),
-  Wall: require('./Wall'),
+  Chaser: require('./Chaser'),
+  Zigzag: require('./Zigzag'),
+  Teleporter: require('./Teleporter')
 }

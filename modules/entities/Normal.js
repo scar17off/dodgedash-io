@@ -6,7 +6,7 @@ module.exports = class Normal extends Entity {
     super();
     this.entityType = 'Normal';
     this.radius = 10;
-    this.speed = 2;
+    this.speed = 2.5;
     this.update = (area) => bounceMovement(this, area);
     this.color = "#636363";
   }

@@ -57,16 +57,16 @@ class Area {
 
         switch (data.position) {
           case "random":
-            entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
+            entity.position = this.getRandomPosition(entity.radius);
             break;
           case "wall":
-            entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
+            entity.position = this.getRandomPosition(entity.radius);
             break;
           default:
             if (typeof data.position === 'object' && 'x' in data.position && 'y' in data.position) {
               entity.position = { ...data.position };
             } else {
-              entity.position = this.getRandomPositionOutsideStartZone(entity.radius);
+              entity.position = this.getRandomPosition(entity.radius);
             }
             break;
         }
@@ -84,7 +84,7 @@ class Area {
     });
   }
 
-  getRandomPositionOutsideStartZone(entityRadius) {
+  getRandomPosition(entityRadius) {
     const margin = entityRadius;
     let x, y;
     const isWithinZone = (zone) => {

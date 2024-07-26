@@ -180,7 +180,7 @@ function changePlayerArea(player, direction) {
     newArea.players.push(player);
     const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
     const teleportZoneWidth = 50;
-    const safeDistance = teleportZoneWidth + player.radius + 10; // Increased safety margin
+    const safeDistance = teleportZoneWidth + player.radius;
     if (direction === 'next') {
       player.position = {
         x: newArea.position.x + safeDistance,

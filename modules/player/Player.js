@@ -18,7 +18,6 @@ class Player {
     };
     this.regionName = regionName;
     this.areaNumber = areaNumber;
-    this.lastAreaChange = null; // Added for cooldown check
   }
 
   getRandomSpawnPosition(area) {
@@ -118,10 +117,10 @@ class Player {
 
   isInNextAreaZone(region) {
     return (
-      this.position.x >= region.nextAreaZone.position.x &&
-      this.position.x <= region.nextAreaZone.position.x + region.nextAreaZone.size.width &&
-      this.position.y >= region.nextAreaZone.position.y &&
-      this.position.y <= region.nextAreaZone.position.y + region.nextAreaZone.size.height
+      this.position.x + this.radius >= region.nextAreaZone.position.x &&
+      this.position.x - this.radius <= region.nextAreaZone.position.x + region.nextAreaZone.size.width &&
+      this.position.y + this.radius >= region.nextAreaZone.position.y &&
+      this.position.y - this.radius <= region.nextAreaZone.position.y + region.nextAreaZone.size.height
     );
   }
 
@@ -130,10 +129,10 @@ class Player {
       return false;
     }
     return (
-      this.position.x >= region.previousAreaZone.position.x &&
-      this.position.x <= region.previousAreaZone.position.x + region.previousAreaZone.size.width &&
-      this.position.y >= region.previousAreaZone.position.y &&
-      this.position.y <= region.previousAreaZone.position.y + region.previousAreaZone.size.height
+      this.position.x + this.radius >= region.previousAreaZone.position.x &&
+      this.position.x - this.radius <= region.previousAreaZone.position.x + region.previousAreaZone.size.width &&
+      this.position.y + this.radius >= region.previousAreaZone.position.y &&
+      this.position.y - this.radius <= region.previousAreaZone.position.y + region.previousAreaZone.size.height
     );
   }
 }

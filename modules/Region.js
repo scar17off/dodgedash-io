@@ -1,6 +1,6 @@
 const entityTypes = require('./entities/Enemies');
 
-class Area {
+class Region {
   constructor(data = {
     position: { x: 0, y: 0 },
     size: { width: 1000, height: 480 },
@@ -23,13 +23,13 @@ class Area {
       position: { x: this.position.x, y: this.position.y },
       size: { width: 300, height: 480 }
     };
-    this.safeZone = {
+    this.finishZone = {
       position: { x: this.position.x + this.size.width - 300, y: this.position.y },
       size: { width: 300, height: 480 }
     };
-    this.finishZone = {
+    this.nextAreaZone = {
       position: { x: this.position.x + this.size.width - 50, y: this.position.y },
-      size: { width: 50, height: 480 }
+      size: { width: 50, height: this.size.height }
     };
     this.previousAreaZone = areaNumber === 0 ? null : {
       position: { x: this.position.x, y: this.position.y },
@@ -98,9 +98,9 @@ class Area {
       y = this.position.y + margin + Math.random() * (this.size.height - 2 * margin);
     } while (
       isWithinZone(this.startZone) ||
-      isWithinZone(this.safeZone) ||
+      isWithinZone(this.finishZone) ||
       isWithinZone(this.previousAreaZone) ||
-      isWithinZone(this.finishZone)
+      isWithinZone(this.nextAreaZone)
     );
     return { x, y };
   }
@@ -112,11 +112,11 @@ class Area {
       background: this.background,
       border: this.border,
       startZone: this.startZone,
-      safeZone: this.safeZone,
       finishZone: this.finishZone,
+      nextAreaZone: this.nextAreaZone,
       previousAreaZone: this.previousAreaZone
     };
   }
 }
 
-module.exports = Area;
+module.exports = Region;

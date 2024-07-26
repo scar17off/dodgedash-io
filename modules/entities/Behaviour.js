@@ -1,5 +1,5 @@
 const checkCollisions = (entity, area, newX, newY) => {
-  const { startZone, safeZone } = area;
+  const { startZone, finishZone } = area;
 
   // Check for collisions with area boundaries
   if (newX - entity.radius < area.position.x || newX + entity.radius > area.position.x + area.size.width) {
@@ -33,19 +33,19 @@ const checkCollisions = (entity, area, newX, newY) => {
   }
 
   // Check for collisions with safe zone boundaries
-  if (newX - entity.radius < safeZone.position.x && newX + entity.radius > safeZone.position.x) {
+  if (newX - entity.radius < finishZone.position.x && newX + entity.radius > finishZone.position.x) {
     entity.velocity.x *= -1;
-    newX = safeZone.position.x - entity.radius;
-  } else if (newX - entity.radius < safeZone.position.x + safeZone.size.width && newX + entity.radius > safeZone.position.x + safeZone.size.width) {
+    newX = finishZone.position.x - entity.radius;
+  } else if (newX - entity.radius < finishZone.position.x + finishZone.size.width && newX + entity.radius > finishZone.position.x + finishZone.size.width) {
     entity.velocity.x *= -1;
-    newX = safeZone.position.x + safeZone.size.width + entity.radius;
+    newX = finishZone.position.x + finishZone.size.width + entity.radius;
   }
-  if (newY - entity.radius < safeZone.position.y && newY + entity.radius > safeZone.position.y) {
+  if (newY - entity.radius < finishZone.position.y && newY + entity.radius > finishZone.position.y) {
     entity.velocity.y *= -1;
-    newY = safeZone.position.y - entity.radius;
-  } else if (newY - entity.radius < safeZone.position.y + safeZone.size.height && newY + entity.radius > safeZone.position.y + safeZone.size.height) {
+    newY = finishZone.position.y - entity.radius;
+  } else if (newY - entity.radius < finishZone.position.y + finishZone.size.height && newY + entity.radius > finishZone.position.y + finishZone.size.height) {
     entity.velocity.y *= -1;
-    newY = safeZone.position.y + safeZone.size.height + entity.radius;
+    newY = finishZone.position.y + finishZone.size.height + entity.radius;
   }
 
   return { newX, newY };
@@ -138,10 +138,10 @@ const teleporterMovement = (entity, area) => {
 };
 
 const isInPlayZone = (position, area) => {
-  const { startZone, safeZone } = area;
+  const { startZone, finishZone } = area;
   return (
     position.x > startZone.position.x + startZone.size.width &&
-    position.x < safeZone.position.x &&
+    position.x < finishZone.position.x &&
     position.y > area.position.y &&
     position.y < area.position.y + area.size.height
   );

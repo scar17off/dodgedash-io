@@ -5,9 +5,16 @@ class Renderer {
   }
 
   renderArea(area, options = { grid: false }) {
-    if (!area || !area.position || !area.size) {
+    if (!area) {
+      console.warn('Area data is null or undefined');
       return;
     }
+    if (!area.position || !area.size) {
+      console.warn('Invalid area data:', JSON.stringify(area, null, 2));
+      return;
+    }
+
+    console.log('Rendering area:', area); // Add this line for debugging
 
     // Draw border
     this.context.strokeStyle = 'white';
@@ -25,15 +32,6 @@ class Renderer {
       area.startZone.size.height
     );
 
-    // Draw safe zone
-    this.context.fillStyle = 'rgba(255, 255, 0, 0.5)';
-    this.context.fillRect(
-      area.safeZone.position.x,
-      area.safeZone.position.y,
-      area.safeZone.size.width,
-      area.safeZone.size.height
-    );
-
     // Draw finish zone
     this.context.fillStyle = 'rgba(0, 255, 0, 0.5)';
     this.context.fillRect(
@@ -41,6 +39,15 @@ class Renderer {
       area.finishZone.position.y,
       area.finishZone.size.width,
       area.finishZone.size.height
+    );
+
+    // Draw next area zone
+    this.context.fillStyle = 'rgba(0, 0, 255, 0.5)';
+    this.context.fillRect(
+      area.nextAreaZone.position.x,
+      area.nextAreaZone.position.y,
+      area.nextAreaZone.size.width,
+      area.nextAreaZone.size.height
     );
 
     // Draw previous area zone if it exists
@@ -82,6 +89,12 @@ class Renderer {
     this.context.arc(player.x, player.y, player.radius || 25, 0, 2 * Math.PI);
     this.context.fillStyle = player.color || (isLocal ? 'white' : 'red');
     this.context.fill();
+    
+    // Render nickname
+    this.context.fillStyle = 'white';
+    this.context.font = '12px Arial';
+    this.context.textAlign = 'center';
+    this.context.fillText(player.name, player.x, player.y - (player.radius || 25) -5);
   }
 
   renderEntity(entity) {
@@ -100,7 +113,10 @@ class Renderer {
     this.camera.applyTo(this.context);
     
     if (gameState && gameState.area) {
+      console.log('Rendering area:', JSON.stringify(gameState.area, null, 2));
       this.renderArea(gameState.area, options);
+    } else {
+      console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
     }
     
     if (gameState && gameState.entities && gameState.entities.length > 0) {
@@ -113,7 +129,7 @@ class Renderer {
     }
     if (gameState && gameState.players && gameState.players.length > 0) {
       for (const player of gameState.players) {
-        if (player.id !== gameState.localPlayer?.id) {
+        if (player.id !== gameState.localPlayer?.id && player.id !== undefined) {
           this.renderPlayer(player);
         }
       }

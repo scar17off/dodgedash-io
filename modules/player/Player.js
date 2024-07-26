@@ -7,7 +7,8 @@ class Player {
     this.socket = socket;
     this.position = { x: 0, y: 0 };
     this.radius = 15;
-    this.baseSpeed = 8;
+    this.baseSpeed = 5 / 2;
+    // this.baseSpeed = 20;
     this._heroType = heroType[0].id;
     this.color = heroType[0].color;
     this.input = {
@@ -17,6 +18,7 @@ class Player {
     };
     this.regionName = regionName;
     this.areaNumber = areaNumber;
+    this.lastAreaChange = null; // Added for cooldown check
   }
 
   getRandomSpawnPosition(area) {
@@ -47,10 +49,10 @@ class Player {
     this.input = input;
   }
 
-  update(area, deltaTime) {
+  update(region, deltaTime) {
     const { mouse, keys, mouseMovement } = this.input;
     let newPosition = { ...this.position };
-    const speed = this.isInStartZone(area) ? 10 : this.baseSpeed;
+    const speed = this.isInStartZone(region) || this.isInFinishZone(region) ? 10 : this.baseSpeed;
 
     if (mouseMovement) {
       const distance = Math.sqrt(mouse.x ** 2 + mouse.y ** 2);
@@ -79,11 +81,11 @@ class Player {
     }
 
     // Adjust position if it's outside the allowed area
-    this.adjustPosition(newPosition, area);
+    this.adjustPosition(newPosition, region);
   }
 
-  adjustPosition(newPosition, area) {
-    const { border, startZone } = area;
+  adjustPosition(newPosition, region) {
+    const { border, startZone } = region;
     const [topLeft, topRight, bottomRight, bottomLeft] = border;
 
     // Check if the new position is within the border or start zone
@@ -96,33 +98,42 @@ class Player {
     }
   }
 
-  isInStartZone(area) {
+  isInStartZone(region) {
     return (
-      this.position.x >= area.startZone.position.x &&
-      this.position.x <= area.startZone.position.x + area.startZone.size.width &&
-      this.position.y >= area.startZone.position.y &&
-      this.position.y <= area.startZone.position.y + area.startZone.size.height
+      this.position.x >= region.startZone.position.x &&
+      this.position.x <= region.startZone.position.x + region.startZone.size.width &&
+      this.position.y >= region.startZone.position.y &&
+      this.position.y <= region.startZone.position.y + region.startZone.size.height
     );
   }
 
-  isInFinishZone(area) {
+  isInFinishZone(region) {
     return (
-      this.position.x >= area.finishZone.position.x &&
-      this.position.x <= area.finishZone.position.x + area.finishZone.size.width &&
-      this.position.y >= area.finishZone.position.y &&
-      this.position.y <= area.finishZone.position.y + area.finishZone.size.height
+      this.position.x >= region.finishZone.position.x &&
+      this.position.x <= region.finishZone.position.x + region.finishZone.size.width &&
+      this.position.y >= region.finishZone.position.y &&
+      this.position.y <= region.finishZone.position.y + region.finishZone.size.height
     );
   }
 
-  isInPreviousAreaZone(area) {
-    if (!area.previousAreaZone) {
+  isInNextAreaZone(region) {
+    return (
+      this.position.x >= region.nextAreaZone.position.x &&
+      this.position.x <= region.nextAreaZone.position.x + region.nextAreaZone.size.width &&
+      this.position.y >= region.nextAreaZone.position.y &&
+      this.position.y <= region.nextAreaZone.position.y + region.nextAreaZone.size.height
+    );
+  }
+
+  isInPreviousAreaZone(region) {
+    if (!region.previousAreaZone) {
       return false;
     }
     return (
-      this.position.x >= area.previousAreaZone.position.x &&
-      this.position.x <= area.previousAreaZone.position.x + area.previousAreaZone.size.width &&
-      this.position.y >= area.previousAreaZone.position.y &&
-      this.position.y <= area.previousAreaZone.position.y + area.previousAreaZone.size.height
+      this.position.x >= region.previousAreaZone.position.x &&
+      this.position.x <= region.previousAreaZone.position.x + region.previousAreaZone.size.width &&
+      this.position.y >= region.previousAreaZone.position.y &&
+      this.position.y <= region.previousAreaZone.position.y + region.previousAreaZone.size.height
     );
   }
 }

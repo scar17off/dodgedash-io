@@ -16,8 +16,7 @@
             "type": "Normal",
             "amount": 15,
             "speed": 1.75,
-            "radius": 10,
-            "position": "random"
+            "radius": 10
           }
         ]
       },

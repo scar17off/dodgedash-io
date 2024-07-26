@@ -2,8 +2,8 @@ const Entity = require('./Entity');
 const { zigzagMovement } = require('./Behaviour');
 
 class Zigzag extends Entity {
-  constructor(x, y, radius, speed) {
-    super(x, y, radius, speed);
+  constructor() {
+    super();
     this.type = 'Zigzag';
     this.color = '#a36a0f';
     this.zigzagTimer = 0;

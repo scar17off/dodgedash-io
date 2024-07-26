@@ -28,6 +28,16 @@ const Game = ({ nickname, hero }) => {
     });
   }, []);
 
+  const PLAYER_TIMEOUT = 5000; // 5 seconds
+
+  const cleanupPlayers = useCallback(() => {
+    const now = Date.now();
+    updateGameState(prevState => ({
+      ...prevState,
+      players: prevState.players.filter(player => now - player.lastUpdate < PLAYER_TIMEOUT)
+    }));
+  }, [updateGameState]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
@@ -68,6 +78,13 @@ const Game = ({ nickname, hero }) => {
     socket.emit('spawn', { nickname, hero });
 
     socket.on('areaData', (areaData) => {
+      if (!areaData) {
+        console.warn('Received null or undefined area data');
+      } else if (typeof areaData !== 'object') {
+        console.warn('Received invalid area data type:', typeof areaData);
+      } else if (!areaData.position || !areaData.size) {
+        console.warn('Received incomplete area data:', areaData);
+      }
       updateGameState(prevState => ({ ...prevState, area: areaData }));
       setAreaDataReceived(true);
     });
@@ -130,7 +147,7 @@ const Game = ({ nickname, hero }) => {
       updateGameState(prevState => ({
         ...prevState,
         players: prevState.players.map(p => 
-          p.id === playerData.id ? { ...p, ...playerData } : p
+          p.id === playerData.id ? { ...p, ...playerData, lastUpdate: Date.now() } : p
         )
       }));
     });
@@ -156,12 +173,19 @@ const Game = ({ nickname, hero }) => {
       if (currentGameState.localPlayer) {
         cameraRef.current.update(currentGameState.localPlayer.x, currentGameState.localPlayer.y);
       }
+      
+      if (!currentGameState.area) {
+        console.warn('Area data is missing in the game state');
+      }
+      
       rendererRef.current.render(currentGameState, { grid: true });
 
       requestAnimationFrame(gameLoop);
     };
 
     gameLoop();
+
+    const cleanupInterval = setInterval(cleanupPlayers, 1000);
 
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -178,8 +202,9 @@ const Game = ({ nickname, hero }) => {
       socket.off('existingPlayers');
       socket.off('playerMove');
       socket.off('playerDisconnected');
+      clearInterval(cleanupInterval);
     };
-  }, [nickname, hero, updateGameState]);
+  }, [nickname, hero, updateGameState, cleanupPlayers]);
 
   return <canvas ref={canvasRef} style={{ display: 'block' }} />;
 };

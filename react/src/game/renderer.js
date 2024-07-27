@@ -85,6 +85,9 @@ class Renderer {
   }
 
   renderPlayer(player, isLocal = false) {
+    const alpha = player.deathTimer !== -1 ? 0.75 : 1.0;
+    this.context.globalAlpha = alpha;
+
     // Render player circle
     this.context.beginPath();
     this.context.arc(player.position.x, player.position.y, player.radius || 25, 0, 2 * Math.PI);
@@ -104,6 +107,8 @@ class Renderer {
       this.context.textAlign = 'center';
       this.context.fillText(Math.floor(player.deathTimer / 1000), player.position.x, player.position.y + 5);
     }
+
+    this.context.globalAlpha = 1.0; // Reset alpha
   }
 
   renderEntity(entity) {
@@ -138,25 +143,31 @@ class Renderer {
     this.context.save();
     this.camera.applyTo(this.context);
     
+    // Render area
     if (gameState && gameState.area) {
       this.renderArea(gameState.area);
     } else {
       console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
     }
     
-    if (gameState && gameState.entities && gameState.entities.length > 0) {
-      for (const entity of gameState.entities) {
-        this.renderEntity(entity);
-      }
-    }
+    // Render local player
     if (gameState && gameState.localPlayer) {
       this.renderPlayer(gameState.localPlayer, true);
     }
+    
+    // Render other players
     if (gameState && gameState.players && gameState.players.length > 0) {
       for (const player of gameState.players) {
         if (player.id !== gameState.localPlayer?.id && player.areaNumber === gameState.localPlayer.areaNumber) {
           this.renderPlayer(player);
         }
+      }
+    }
+    
+    // Render entities
+    if (gameState && gameState.entities && gameState.entities.length > 0) {
+      for (const entity of gameState.entities) {
+        this.renderEntity(entity);
       }
     }
     

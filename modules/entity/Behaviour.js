@@ -4,11 +4,11 @@ const checkCollisions = (entity, area, newX, newY) => {
   // Check for collisions with area boundaries
   if (newX - entity.radius < area.position.x || newX + entity.radius > area.position.x + area.size.width) {
     entity.velocity.x *= -1;
-    newX = entity.position.x;
+    newX = entity.position.x; // Reset to previous position
   }
   if (newY - entity.radius < area.position.y || newY + entity.radius > area.position.y + area.size.height) {
     entity.velocity.y *= -1;
-    newY = entity.position.y;
+    newY = entity.position.y; // Reset to previous position
   }
 
   // Check for collisions with start zone boundaries
@@ -47,6 +47,10 @@ const checkCollisions = (entity, area, newX, newY) => {
     entity.velocity.y *= -1;
     newY = finishZone.position.y + finishZone.size.height + entity.radius;
   }
+
+  // Ensure the entity stays within the area bounds
+  newX = Math.max(area.position.x + entity.radius, Math.min(newX, area.position.x + area.size.width - entity.radius));
+  newY = Math.max(area.position.y + entity.radius, Math.min(newY, area.position.y + area.size.height - entity.radius));
 
   return { newX, newY };
 };

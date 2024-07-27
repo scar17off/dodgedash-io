@@ -8,7 +8,6 @@ class Region {
   }
 
   loadArea(areaNumber) {
-    console.log(`Loading area ${areaNumber} in region ${this.regionName}`);
     if (this.areasData[areaNumber]) {
       // Always create a new Area instance, even if one already exists
       this.areas[areaNumber] = new Area(this.areasData[areaNumber], this.regionName, parseInt(areaNumber));

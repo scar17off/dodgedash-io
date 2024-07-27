@@ -3,8 +3,15 @@ import socket from './network';
 export function setupControls(canvas) {
   const controls = {
     mouse: { x: 0, y: 0 },
-    keys: { w: false, a: false, s: false, d: false },
+    keys: {},
     mouseMovement: false
+  };
+
+  const keyMap = {
+    'KeyW': 'w',
+    'KeyA': 'a',
+    'KeyS': 's',
+    'KeyD': 'd'
   };
 
   canvas.addEventListener('mousemove', (e) => {
@@ -14,16 +21,18 @@ export function setupControls(canvas) {
   });
 
   window.addEventListener('keydown', (e) => {
-    if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
-      controls.keys[e.key.toLowerCase()] = true;
-      socket.emit('keyPress', { key: e.key.toLowerCase(), pressed: true });
+    const key = keyMap[e.code];
+    if (key) {
+      controls.keys[key] = true;
+      socket.emit('keyPress', { key, pressed: true });
     }
   });
 
   window.addEventListener('keyup', (e) => {
-    if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) {
-      controls.keys[e.key.toLowerCase()] = false;
-      socket.emit('keyPress', { key: e.key.toLowerCase(), pressed: false });
+    const key = keyMap[e.code];
+    if (key) {
+      controls.keys[key] = false;
+      socket.emit('keyPress', { key, pressed: false });
     }
   });
 

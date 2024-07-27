@@ -7,8 +7,8 @@ class Player {
     this.socket = socket;
     this.position = { x: 0, y: 0 };
     this.radius = 15;
-    // this.baseSpeed = 5 / 2;
-    this.baseSpeed = 20;
+    this.baseSpeed = 5 / 2;
+    // this.baseSpeed = 20;
     this._heroType = heroType[0].id;
     this.color = heroType[0].color;
     this.input = {
@@ -18,6 +18,19 @@ class Player {
     };
     this.regionName = "Alpha";
     this.areaNumber = 0;
+    this.deathTimer = -1;
+  }
+
+  respawn() {
+    this.deathTimer = -1;
+    this.position = this.getRandomSpawnPosition(this.area);
+  }
+
+  collideCheck(player) {
+    return this.position.x - this.radius < player.position.x + player.radius &&
+           this.position.x + this.radius > player.position.x - player.radius &&
+           this.position.y - this.radius < player.position.y + player.radius &&
+           this.position.y + this.radius > player.position.y - player.radius;
   }
 
   getRandomSpawnPosition(area) {
@@ -49,6 +62,10 @@ class Player {
   }
 
   update(area) {
+    if (this.deathTimer > 0) {
+      return;
+    }
+
     const { mouse, keys, mouseMovement } = this.input;
     let newPosition = { ...this.position };
     const speed = this.isInStartZone(area) || this.isInFinishZone(area) ? 10 : this.baseSpeed;
@@ -143,7 +160,8 @@ class Player {
       speed: this.baseSpeed,
       color: this.color,
       name: this.name,
-      areaNumber: this.areaNumber
+      areaNumber: this.areaNumber,
+      deathTimer: this.deathTimer
     };
   }
 }

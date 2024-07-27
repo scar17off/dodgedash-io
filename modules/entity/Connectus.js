@@ -48,6 +48,7 @@ module.exports = class Connectus extends Entity {
         const midY1 = this.position.y + Math.sin(angle) * partialLength;
         const midX2 = this.twin.position.x - Math.cos(angle) * partialLength;
         const midY2 = this.twin.position.y - Math.sin(angle) * partialLength;
+        
         this.line = [
           [this.position.x, this.position.y, midX1, midY1],
           [this.twin.position.x, this.twin.position.y, midX2, midY2]

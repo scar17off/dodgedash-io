@@ -185,13 +185,7 @@ function changePlayerArea(player, direction) {
     player.socket.emit('areaData', areaData);
 
     // Send updated entity data for the new area
-    const entityData = newArea.entities.map(entity => ({
-      x: entity.position.x,
-      y: entity.position.y,
-      radius: entity.radius,
-      color: entity.color,
-      entityType: entity.entityType
-    }));
+    const entityData = newArea.entities.map(entity => entity.getEntityData());
     player.socket.emit('entityUpdate', entityData);
 
     player.socket.leave(player.regionName + '-' + oldAreaNumber);
@@ -202,16 +196,7 @@ function changePlayerArea(player, direction) {
     io.to(`${player.regionName}-${newAreaNumber}`).emit('playerJoined', playerData);
 
     // Send the new list of players in the new area to the player
-    const playersInNewArea = newArea.players.filter(p => p.id !== player.id).map(p => ({
-      id: p.id,
-      x: p.position.x,
-      y: p.position.y,
-      radius: p.radius,
-      speed: p.baseSpeed,
-      color: p.color,
-      name: p.name,
-      areaNumber: newAreaNumber
-    }));
+    const playersInNewArea = newArea.players.filter(p => p.id !== player.id).map(p => p.getPlayerData());
     player.socket.emit('existingPlayers', playersInNewArea);
 
     // Emit areaChanged event to the client
@@ -235,6 +220,7 @@ function changePlayerArea(player, direction) {
 const gameLoop = () => {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
+      // Update players
       for (const player of area.players) {
         player.update(area);
         
@@ -245,10 +231,30 @@ const gameLoop = () => {
           changePlayerArea(player, 'previous');
         }
 
-        // Check for collisions with entities
+        // Timer update and respawn
+        if (player.deathTimer !== -1) {
+          player.deathTimer = Math.max(0, Math.floor(player.deathTimer - 1000 / config.fps));
+          if (player.deathTimer <= 0) {
+            player.deathTimer = -1;
+            player.position = player.getRandomSpawnPosition(area);
+          }
+        }
+
+        // Check for collisions with entities in the same area
         for (const entity of area.entities) {
           if (entity.collideCheck(player)) {
-            player.deathTimer = area.deathTimer;
+            player.deathTimer = area.deathTimer * 1000;
+            break; // Exit the loop once a collision is detected
+          }
+        }
+        
+        // Check for collisions with other players in the same area
+        if (player.deathTimer === -1) {  // Only check collisions if player is alive
+          for (const otherPlayer of area.players) {
+            if (otherPlayer.id !== player.id && player.collideCheck(otherPlayer)) {
+              otherPlayer.deathTimer = -1;
+              break; // Exit the loop once a collision is detected
+            }
           }
         }
       }

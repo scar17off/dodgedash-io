@@ -11,6 +11,7 @@ class Area {
     this.position = { x: 0, y: 0 };
     this.size = data.size;
     this.background = data.background;
+    this.deathTimer = data.deathTimer;
     this.players = [];
     this.entities = [];
     this.border = [

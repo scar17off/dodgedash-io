@@ -19,7 +19,6 @@ const Game = ({ nickname, hero }) => {
   };
   const gameStateRef = useRef(initialState);
   const [gameState, setGameState] = useState(initialState);
-  const [areaDataReceived, setAreaDataReceived] = useState(false);
 
   const updateGameState = useCallback((updater) => {
     setGameState(prevState => {
@@ -39,13 +38,13 @@ const Game = ({ nickname, hero }) => {
 
     controlsRef.current = setupControls(canvas);
     cameraRef.current = new Camera(canvas.width, canvas.height);
-    rendererRef.current = new Renderer(context, cameraRef.current);
+    rendererRef.current = new Renderer(context, cameraRef.current, { grid: true, darkMode: true, enemyOutline: false });
 
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       cameraRef.current = new Camera(canvas.width, canvas.height);
-      rendererRef.current = new Renderer(context, cameraRef.current);
+      rendererRef.current = new Renderer(context, cameraRef.current, { grid: true, darkMode: true, enemyOutline: false });
     };
 
     window.addEventListener('resize', handleResize);
@@ -78,7 +77,6 @@ const Game = ({ nickname, hero }) => {
         console.warn('Received incomplete area data:', areaData);
       }
       updateGameState(prevState => ({ ...prevState, area: areaData }));
-      setAreaDataReceived(true);
     });
 
     socket.on('playersUpdate', (playersData) => {
@@ -184,7 +182,7 @@ const Game = ({ nickname, hero }) => {
         console.warn('Area data is missing in the game state');
       }
       
-      rendererRef.current.render(currentGameState, { grid: true });
+      rendererRef.current.render(currentGameState);
 
       requestAnimationFrame(gameLoop);
     };

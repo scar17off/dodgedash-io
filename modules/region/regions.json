@@ -18,12 +18,6 @@
             "amount": 15,
             "speed": 1.75,
             "radius": 10
-          },
-          {
-            "type": "Connectus",
-            "amount": 2,
-            "speed": 1.75,
-            "radius": 10
           }
         ]
       },
@@ -80,6 +74,28 @@
             "amount": 2,
             "speed": 1,
             "radius": 18
+          }
+        ]
+      },
+      "3": {
+        "background": "black",
+        "deathTimer": 10,
+        "size": {
+          "width": 4000,
+          "height": 480
+        },
+        "entities": [
+          {
+            "type": "Normal",
+            "amount": 15,
+            "speed": 2.5,
+            "radius": 20
+          },
+          {
+            "type": "Connectus",
+            "amount": 2,
+            "speed": 1.75,
+            "radius": 10
           }
         ]
       }

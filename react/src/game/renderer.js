@@ -1,10 +1,11 @@
 class Renderer {
-  constructor(context, camera) {
+  constructor(context, camera, options = { grid: false, darkMode: false, enemyOutline: false }) {
     this.context = context;
     this.camera = camera;
+    this.options = options;
   }
 
-  renderArea(area, options = { grid: false }) {
+  renderArea(area) {
     if (!area) {
       console.warn('Area data is null or undefined');
       return;
@@ -15,7 +16,7 @@ class Renderer {
     }
 
     // Draw border
-    this.context.strokeStyle = 'white';
+    this.context.strokeStyle = this.options.darkMode ? 'white' : 'black';
     this.context.lineWidth = 2;
     this.context.beginPath();
     this.context.rect(area.position.x, area.position.y, area.size.width, area.size.height);
@@ -31,7 +32,7 @@ class Renderer {
     );
 
     // Draw finish zone
-    this.context.fillStyle = 'rgba(0, 255, 0, 0.5)';
+    this.context.fillStyle = 'rgba(255, 255, 0, 0.5)';
     this.context.fillRect(
       area.finishZone.position.x,
       area.finishZone.position.y,
@@ -60,12 +61,13 @@ class Renderer {
     }
 
     // Draw grid if option is enabled
-    if (options.grid) {
-      this.context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    if (this.options.grid) {
+      const gridStep = 100;
+      this.context.strokeStyle = this.options.darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
       this.context.lineWidth = 1;
 
       // Vertical lines
-      for (let x = area.position.x; x <= area.position.x + area.size.width; x += 50) {
+      for (let x = area.position.x; x <= area.position.x + area.size.width; x += gridStep) {
         this.context.beginPath();
         this.context.moveTo(x, area.position.y);
         this.context.lineTo(x, area.position.y + area.size.height);
@@ -73,7 +75,7 @@ class Renderer {
       }
 
       // Horizontal lines
-      for (let y = area.position.y; y <= area.position.y + area.size.height; y += 50) {
+      for (let y = area.position.y; y <= area.position.y + area.size.height; y += gridStep) {
         this.context.beginPath();
         this.context.moveTo(area.position.x, y);
         this.context.lineTo(area.position.x + area.size.width, y);
@@ -83,16 +85,25 @@ class Renderer {
   }
 
   renderPlayer(player, isLocal = false) {
+    // Render player circle
     this.context.beginPath();
     this.context.arc(player.position.x, player.position.y, player.radius || 25, 0, 2 * Math.PI);
     this.context.fillStyle = player.color || (isLocal ? 'white' : 'red');
     this.context.fill();
     
     // Render nickname
-    this.context.fillStyle = 'white';
+    this.context.fillStyle = this.options.darkMode ? 'white' : 'black';
     this.context.font = '12px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText(player.name, player.position.x, player.position.y - (player.radius || 25) -5);
+    this.context.fillText(player.name, player.position.x, player.position.y - (player.radius || 25) - 5);
+
+    // Render death timer
+    if(player.deathTimer !== -1) {
+      this.context.fillStyle = 'red';
+      this.context.font = '16px Arial';
+      this.context.textAlign = 'center';
+      this.context.fillText(Math.floor(player.deathTimer / 1000), player.position.x, player.position.y + 5);
+    }
   }
 
   renderEntity(entity) {
@@ -100,6 +111,12 @@ class Renderer {
     this.context.arc(entity.position.x, entity.position.y, entity.radius, 0, 2 * Math.PI);
     this.context.fillStyle = entity.color;
     this.context.fill();
+
+    if (this.options.enemyOutline) {
+      this.context.lineWidth = 3;
+      this.context.strokeStyle = this.options.darkMode ? 'white' : 'black';
+      this.context.stroke();
+    }
 
     if (entity.entityType == 'Connectus' && entity.line) {
       this.context.beginPath();
@@ -113,16 +130,16 @@ class Renderer {
     }
   }
 
-  render(gameState, options = { grid: false }) {
+  render(gameState) {
     const { width, height } = this.camera;
-    this.context.fillStyle = 'black';
+    this.context.fillStyle = this.options.darkMode ? 'black' : 'white';
     this.context.fillRect(0, 0, width, height);
     
     this.context.save();
     this.camera.applyTo(this.context);
     
     if (gameState && gameState.area) {
-      this.renderArea(gameState.area, options);
+      this.renderArea(gameState.area);
     } else {
       console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
     }

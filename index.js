@@ -49,7 +49,7 @@ for (const [regionName, regionData] of Object.entries(areasData)) {
 function sendPlayerUpdates() {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
-      const playerUpdates = area.players.map(player => player.getPlayerData());
+      const playerUpdates = area.players.filter(player => player.socket.connected).map(player => player.getPlayerData());
       io.to(`${region.regionName}-${area.areaNumber}`).emit('playersUpdate', playerUpdates);
     }
   }
@@ -114,19 +114,15 @@ io.on("connection", socket => {
       
       // Remove player from the current area
       let currentArea = regions[player.regionName]?.getArea(player.areaNumber);
-      if (!currentArea) {
-        regions[player.regionName].loadArea(player.areaNumber);
-        currentArea = regions[player.regionName].getArea(player.areaNumber);
-      }
       if (currentArea) {
         const playerIndex = currentArea.players.indexOf(player);
         if (playerIndex !== -1) {
           currentArea.players.splice(playerIndex, 1);
         }
+        
+        // Notify players in the same area about the disconnection
+        io.emit('playerDisconnected', player.id);
       }
-      
-      // Notify all players about the disconnection
-      io.emit('playerDisconnected', player.id);
     }
   });
 });

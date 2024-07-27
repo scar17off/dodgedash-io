@@ -18,6 +18,12 @@
             "amount": 15,
             "speed": 1.75,
             "radius": 10
+          },
+          {
+            "type": "Connectus",
+            "amount": 2,
+            "speed": 1.75,
+            "radius": 10
           }
         ]
       },

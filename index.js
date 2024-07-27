@@ -244,6 +244,13 @@ const gameLoop = () => {
         } else if (area.previousAreaZone && player.isInPreviousAreaZone(area)) {
           changePlayerArea(player, 'previous');
         }
+
+        // Check for collisions with entities
+        for (const entity of area.entities) {
+          if (entity.collideCheck(player)) {
+            player.deathTimer = area.deathTimer;
+          }
+        }
       }
 
       // Update entities
@@ -259,13 +266,7 @@ const gameLoop = () => {
   // Send entity updates
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
-      const entityData = area.entities.map(entity => ({
-        x: entity.position.x,
-        y: entity.position.y,
-        radius: entity.radius,
-        color: entity.color,
-        entityType: entity.entityType
-      }));
+      const entityData = area.entities.map(entity => entity.getEntityData());
       io.to(`${region.regionName}-${area.areaNumber}`).emit('entityUpdate', entityData);
     }
   }

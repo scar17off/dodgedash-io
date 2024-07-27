@@ -138,8 +138,7 @@ class Player {
   getPlayerData() {
     return {
       id: this.id,
-      x: this.position.x,
-      y: this.position.y,
+      position: this.position,
       radius: this.radius,
       speed: this.baseSpeed,
       color: this.color,

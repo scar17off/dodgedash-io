@@ -11,7 +11,7 @@ const Game = ({ nickname, hero }) => {
   const rendererRef = useRef(null);
   const lastSentInputRef = useRef(null);
   const initialState = {
-    localPlayer: { x: 0, y: 0, speed: 0, radius: 0, name: nickname, areaNumber: 0 },
+    localPlayer: { position: { x: 0, y: 0 }, speed: 0, radius: 0, name: nickname, areaNumber: 0 },
     players: [],
     entities: [],
     area: null,
@@ -177,7 +177,7 @@ const Game = ({ nickname, hero }) => {
 
       const currentGameState = gameStateRef.current || initialState;
       if (currentGameState.localPlayer) {
-        cameraRef.current.update(currentGameState.localPlayer.x, currentGameState.localPlayer.y);
+        cameraRef.current.update(currentGameState.localPlayer.position.x, currentGameState.localPlayer.position.y);
       }
       
       if (!currentGameState.area) {

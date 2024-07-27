@@ -84,7 +84,7 @@ class Renderer {
 
   renderPlayer(player, isLocal = false) {
     this.context.beginPath();
-    this.context.arc(player.x, player.y, player.radius || 25, 0, 2 * Math.PI);
+    this.context.arc(player.position.x, player.position.y, player.radius || 25, 0, 2 * Math.PI);
     this.context.fillStyle = player.color || (isLocal ? 'white' : 'red');
     this.context.fill();
     
@@ -92,14 +92,25 @@ class Renderer {
     this.context.fillStyle = 'white';
     this.context.font = '12px Arial';
     this.context.textAlign = 'center';
-    this.context.fillText(player.name, player.x, player.y - (player.radius || 25) -5);
+    this.context.fillText(player.name, player.position.x, player.position.y - (player.radius || 25) -5);
   }
 
   renderEntity(entity) {
     this.context.beginPath();
-    this.context.arc(entity.x, entity.y, entity.radius, 0, 2 * Math.PI);
+    this.context.arc(entity.position.x, entity.position.y, entity.radius, 0, 2 * Math.PI);
     this.context.fillStyle = entity.color;
     this.context.fill();
+
+    if (entity.entityType == 'Connectus' && entity.line) {
+      this.context.beginPath();
+      for (const segment of entity.line) {
+        this.context.moveTo(segment[0], segment[1]);
+        this.context.lineTo(segment[2], segment[3]);
+      }
+      this.context.strokeStyle = entity.color;
+      this.context.lineWidth = entity.lineWidth;
+      this.context.stroke();
+    }
   }
 
   render(gameState, options = { grid: false }) {

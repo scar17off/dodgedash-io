@@ -32,7 +32,6 @@ class Region {
   }
 
   getLoadedAreas() {
-    console.log(`Loaded areas in region ${this.regionName}:`, Object.keys(this.areas));
     return Object.values(this.areas);
   }
 }

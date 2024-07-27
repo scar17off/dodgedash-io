@@ -7,8 +7,9 @@ const path = require('path');
 const config = require("./config.json");
 
 const Region = require("./modules/region/Region");
-const { heroType } = require("./modules/protocol.json");
 const Client = require("./modules/player/Client");
+const { heroType } = require("./modules/protocol.json");
+const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
 
 const app = express();
 app.use(cors());
@@ -38,8 +39,6 @@ function copyProtocolToReact() {
 
 copyProtocolToReact();
 
-const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'regions.json'), 'utf8'));
-
 // Initialize regions
 const regions = {};
 for (const [regionName, regionData] of Object.entries(areasData)) {
@@ -56,9 +55,9 @@ function sendPlayerUpdates() {
 }
 
 io.on("connection", socket => {
-  const client = new Client(socket, socket.req);
-  server.clients.push(client);
+  const client = new Client(socket, socket.request);
   const player = client.player;
+  server.clients.push(client);
   
   socket.on('spawn', ({ nickname, hero }) => {
     player.name = nickname;

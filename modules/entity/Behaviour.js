@@ -160,5 +160,6 @@ module.exports = {
   chaserMovement,
   teleporterMovement,
   ensureWithinBounds,
-  isInPlayZone
+  isInPlayZone,
+  checkCollisions
 };

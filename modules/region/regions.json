@@ -9,7 +9,7 @@
         "background": "black",
         "deathTimer": 10,
         "size": {
-          "width": 4000,
+          "width": 3000,
           "height": 480
         },
         "entities": [
@@ -25,7 +25,7 @@
         "background": "black",
         "deathTimer": 10,
         "size": {
-          "width": 4000,
+          "width": 3000,
           "height": 480
         },
         "entities": [
@@ -47,7 +47,7 @@
         "background": "black",
         "deathTimer": 10,
         "size": {
-          "width": 4000,
+          "width": 3000,
           "height": 480
         },
         "entities": [
@@ -81,7 +81,7 @@
         "background": "black",
         "deathTimer": 10,
         "size": {
-          "width": 4000,
+          "width": 3000,
           "height": 480
         },
         "entities": [
@@ -96,6 +96,22 @@
             "amount": 2,
             "speed": 1.75,
             "radius": 10
+          }
+        ]
+      },
+      "4": {
+        "background": "black",
+        "deathTimer": 10,
+        "size": {
+          "width": 3000,
+          "height": 480
+        },
+        "entities": [
+          {
+            "type": "Normal",
+            "amount": 5,
+            "speed": 2.5,
+            "radius": 30
           }
         ]
       }

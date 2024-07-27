@@ -23,7 +23,7 @@ class Entity {
       entityType: this.entityType,
       position: this.position,
       radius: this.radius,
-      color: this.color,
+      color: this.color
     };
   }
 }

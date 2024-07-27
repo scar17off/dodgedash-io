@@ -57,14 +57,7 @@ const Game = ({ nickname, hero }) => {
       }
     };
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'l' || e.key === 'L') {
-        cameraRef.current.toggleZoomLock();
-      }
-    };
-
     canvas.addEventListener('wheel', handleWheel);
-    window.addEventListener('keydown', handleKeyDown);
 
     socket.emit('spawn', { nickname, hero });
 
@@ -192,7 +185,6 @@ const Game = ({ nickname, hero }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('keydown', handleKeyDown);
       socket.off('areaData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');

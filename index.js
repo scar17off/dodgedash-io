@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const config = require("./config.json");
 
-const Region = require("./modules/Region");
+const Region = require("./modules/region/Region");
 const { heroType } = require("./modules/protocol.json");
 const Client = require("./modules/player/Client");
 

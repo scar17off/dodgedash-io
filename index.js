@@ -233,7 +233,7 @@ const gameLoop = () => {
 
         // Timer update and respawn
         if (player.deathTimer !== -1) {
-          player.deathTimer = Math.max(0, Math.floor(player.deathTimer - 1000 / config.fps));
+          player.deathTimer = Math.max(0, player.deathTimer - 1000 / config.fps / 1.5);
           if (player.deathTimer <= 0) {
             player.deathTimer = -1;
             player.position = player.getRandomSpawnPosition(area);

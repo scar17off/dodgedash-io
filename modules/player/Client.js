@@ -4,7 +4,7 @@ class Client {
   constructor(ws, req) {
     this.ws = ws;
     this.req = req;
-    this.player = new Player(this.ws, this.req);
+    this.player = new Player(this.ws);
   }
 
   send(event, data) {

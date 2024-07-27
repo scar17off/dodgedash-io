@@ -6,9 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const config = require("./config.json");
 
-const Player = require("./modules/player/Player");
 const Region = require("./modules/Region");
 const { heroType } = require("./modules/protocol.json");
+const Client = require("./modules/player/Client");
 
 const app = express();
 app.use(cors());
@@ -22,8 +22,7 @@ const io = new Server(httpServer, {
 
 global.server = {
   lastId: 0,
-  clients: [],
-  areas: []
+  clients: []
 }
 
 function copyProtocolToReact() {
@@ -41,44 +40,47 @@ copyProtocolToReact();
 
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'regions.json'), 'utf8'));
 
-// Initialize areas
-const areas = {};
+// Initialize regions
+const regions = {};
 for (const [regionName, regionData] of Object.entries(areasData)) {
-  areas[regionName] = [];
-  for (const [areaNumber, areaData] of Object.entries(regionData.areas)) {
-    const region = new Region({ ...areaData, position: regionData.position }, regionName, parseInt(areaNumber));
-    areas[regionName].push(region);
+  regions[regionName] = new Region(regionData, regionName);
+}
+
+function sendPlayerUpdates() {
+  for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      const playerUpdates = area.players.map(player => player.getPlayerData());
+      io.to(`${region.regionName}-${area.areaNumber}`).emit('playersUpdate', playerUpdates);
+    }
   }
 }
 
 io.on("connection", socket => {
-  const player = new Player(socket, "Alpha", 0);
+  const client = new Client(socket, socket.req);
+  server.clients.push(client);
+  const player = client.player;
   
   socket.on('spawn', ({ nickname, hero }) => {
     player.name = nickname;
     player.heroType = heroType.find(h => h.name === hero)?.id || 0;
-    server.clients.push(player);
-    const currentArea = areas[player.regionName][player.areaNumber];
+    let currentArea = regions[player.regionName].getArea(player.areaNumber);
+    if (!currentArea) {
+      regions[player.regionName].loadArea(player.areaNumber);
+      currentArea = regions[player.regionName].getArea(player.areaNumber);
+    }
     currentArea.players.push(player);
     player.position = player.getRandomSpawnPosition(currentArea);
     
     const areaData = currentArea.getAreaData();
     socket.emit('areaData', areaData);
 
-    const playerData = {
-      id: player.id,
-      x: player.position.x,
-      y: player.position.y,
-      radius: player.radius,
-      speed: player.baseSpeed,
-      color: player.color,
-      name: player.name
-    };
-    socket.emit('playerData', playerData);
+    socket.emit('selfId', player.id);
 
-    socket.broadcast.emit('newPlayer', playerData);
+    const playerData = player.getPlayerData();
+    socket.emit('playerUpdate', playerData);
+    socket.to(`${player.regionName}-${player.areaNumber}`).emit('newPlayer', playerData);
 
-    const existingPlayers = server.clients
+    const existingPlayers = currentArea.players
       .filter(p => p.id !== player.id)
       .map(p => ({
         id: p.id,
@@ -95,19 +97,32 @@ io.on("connection", socket => {
   });
 
   socket.on('playerInput', (input) => {
-    player.handleInput(input);
+    let currentArea = regions[player.regionName].getArea(player.areaNumber);
+    if (!currentArea) {
+      regions[player.regionName].loadArea(player.areaNumber);
+      currentArea = regions[player.regionName].getArea(player.areaNumber);
+    }
+    player.handleInput(input, currentArea);
+    
+    // We'll send updates in bulk, so no need to emit here
   });
 
   socket.on('disconnect', () => {
-    const index = server.clients.indexOf(player);
+    const index = server.clients.indexOf(client);
     if (index !== -1) {
       server.clients.splice(index, 1);
       
       // Remove player from the current area
-      const currentArea = areas[player.regionName][player.areaNumber];
-      const playerIndex = currentArea.players.indexOf(player);
-      if (playerIndex !== -1) {
-        currentArea.players.splice(playerIndex, 1);
+      let currentArea = regions[player.regionName]?.getArea(player.areaNumber);
+      if (!currentArea) {
+        regions[player.regionName].loadArea(player.areaNumber);
+        currentArea = regions[player.regionName].getArea(player.areaNumber);
+      }
+      if (currentArea) {
+        const playerIndex = currentArea.players.indexOf(player);
+        if (playerIndex !== -1) {
+          currentArea.players.splice(playerIndex, 1);
+        }
       }
       
       // Notify all players about the disconnection
@@ -116,68 +131,42 @@ io.on("connection", socket => {
   });
 });
 
-const gameLoop = () => {
-  for (const regionAreas of Object.values(areas)) {
-    for (const area of regionAreas) {
-      for (const player of area.players) {
-        player.update(area);
-        const playerData = {
-          id: player.id,
-          x: player.position.x,
-          y: player.position.y,
-          radius: player.radius,
-          speed: player.isInStartZone(area) || player.isInFinishZone(area) ? 10 : player.baseSpeed,
-          color: player.color,
-          name: player.name
-        };
-        player.socket.emit('playerUpdate', playerData);
-        player.socket.to(area.regionName + '-' + area.areaNumber).emit('playerMove', playerData);
-        
-        if (player.isInNextAreaZone(area)) {
-          changePlayerArea(player, 'next');
-        } else if (area.previousAreaZone && player.isInPreviousAreaZone(area)) {
-          changePlayerArea(player, 'previous');
-        }
-      }
-
-      const entityData = area.entities.map(entity => ({
-        x: entity.position.x,
-        y: entity.position.y,
-        radius: entity.radius,
-        color: entity.color,
-        entityType: entity.entityType
-      }));
-
-      for (const player of area.players) {
-        player.socket.emit('entityUpdate', entityData);
-      }
-
-      for (const entity of area.entities) {
-        entity.update(area);
-      }
-    }
-  }
-
-  setTimeout(gameLoop, 1000 / config.fps);
-};
-
 function changePlayerArea(player, direction) {
-  const currentRegion = areas[player.regionName];
-  let newAreaNumber = player.areaNumber;
-  if (direction === 'next' && player.areaNumber < currentRegion.length - 1) {
+  const currentRegion = regions[player.regionName];
+  const oldAreaNumber = player.areaNumber;
+  let newAreaNumber = oldAreaNumber;
+
+  if (direction === 'next' && oldAreaNumber < Object.keys(currentRegion.areasData).length - 1) {
     newAreaNumber++;
-  } else if (direction === 'previous' && player.areaNumber > 0) {
+  } else if (direction === 'previous' && oldAreaNumber > 0) {
     newAreaNumber--;
   }
-  if (newAreaNumber !== player.areaNumber) {
-    const currentArea = currentRegion[player.areaNumber];
+
+  if (newAreaNumber !== oldAreaNumber) {
+    let currentArea = currentRegion.getArea(oldAreaNumber);
+    if (!currentArea) {
+      currentRegion.loadArea(oldAreaNumber);
+      currentArea = currentRegion.getArea(oldAreaNumber);
+    }
+
     const playerIndex = currentArea.players.indexOf(player);
     if (playerIndex !== -1) {
       currentArea.players.splice(playerIndex, 1);
     }
+    
+    // Unload the current area if it's empty
+    if (currentArea.players.length === 0) {
+      currentRegion.unloadArea(oldAreaNumber);
+    }
+
     player.areaNumber = newAreaNumber;
-    const newArea = currentRegion[newAreaNumber];
+    let newArea = currentRegion.getArea(newAreaNumber);
+    if (!newArea) {
+      currentRegion.loadArea(newAreaNumber);
+      newArea = currentRegion.getArea(newAreaNumber);
+    }
     newArea.players.push(player);
+
     const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
     const teleportZoneWidth = 50;
     const safeDistance = teleportZoneWidth + player.radius;
@@ -193,14 +182,12 @@ function changePlayerArea(player, direction) {
       };
     }
     
-    player.socket.emit('areaChanged', {
-      areaData: newArea.getAreaData(),
-      playerUpdate: {
-        x: player.position.x,
-        y: player.position.y,
-        areaNumber: player.areaNumber
-      }
-    });
+    const playerData = player.getPlayerData();
+    player.socket.emit('playerUpdate', playerData);
+
+    // Send updated area data for the new area
+    const areaData = newArea.getAreaData();
+    player.socket.emit('areaData', areaData);
 
     // Send updated entity data for the new area
     const entityData = newArea.entities.map(entity => ({
@@ -212,23 +199,84 @@ function changePlayerArea(player, direction) {
     }));
     player.socket.emit('entityUpdate', entityData);
 
-    player.socket.leave(player.regionName + '-' + currentArea.areaNumber);
+    player.socket.leave(player.regionName + '-' + oldAreaNumber);
     player.socket.join(player.regionName + '-' + newAreaNumber);
 
     // Notify other players about the player leaving and joining
-    player.socket.to(player.regionName + '-' + currentArea.areaNumber).emit('playerLeft', player.id);
-    player.socket.to(player.regionName + '-' + newAreaNumber).emit('playerJoined', {
-      id: player.id,
-      x: player.position.x,
-      y: player.position.y,
-      radius: player.radius,
-      speed: player.baseSpeed,
-      color: player.color,
-      name: player.name
+    io.to(`${player.regionName}-${oldAreaNumber}`).emit('playerLeft', player.id);
+    io.to(`${player.regionName}-${newAreaNumber}`).emit('playerJoined', playerData);
+
+    // Send the new list of players in the new area to the player
+    const playersInNewArea = newArea.players.filter(p => p.id !== player.id).map(p => ({
+      id: p.id,
+      x: p.position.x,
+      y: p.position.y,
+      radius: p.radius,
+      speed: p.baseSpeed,
+      color: p.color,
+      name: p.name,
+      areaNumber: newAreaNumber
+    }));
+    player.socket.emit('existingPlayers', playersInNewArea);
+
+    // Emit areaChanged event to the client
+    player.socket.emit('areaChanged', {
+      areaData: newArea.getAreaData(),
+      playerUpdate: playerData
+    });
+
+    // Check if any areas should be unloaded
+    [oldAreaNumber, newAreaNumber - 1, newAreaNumber + 1].forEach(areaToCheck => {
+      if (areaToCheck >= 0 && areaToCheck < Object.keys(currentRegion.areasData).length) {
+        const areaToUnload = currentRegion.getArea(areaToCheck);
+        if (areaToUnload && areaToUnload.players.length === 0 && areaToCheck !== newAreaNumber) {
+          currentRegion.unloadArea(areaToCheck);
+        }
+      }
     });
   }
 }
 
+const gameLoop = () => {
+  for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      for (const player of area.players) {
+        player.update(area);
+        
+        // Check if player should change areas
+        if (player.isInNextAreaZone(area)) {
+          changePlayerArea(player, 'next');
+        } else if (area.previousAreaZone && player.isInPreviousAreaZone(area)) {
+          changePlayerArea(player, 'previous');
+        }
+      }
+
+      // Update entities
+      for (const entity of area.entities) {
+        entity.update(area);
+      }
+    }
+  }
+
+  // Send all player updates at once
+  sendPlayerUpdates();
+
+  // Send entity updates
+  for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      const entityData = area.entities.map(entity => ({
+        x: entity.position.x,
+        y: entity.position.y,
+        radius: entity.radius,
+        color: entity.color,
+        entityType: entity.entityType
+      }));
+      io.to(`${region.regionName}-${area.areaNumber}`).emit('entityUpdate', entityData);
+    }
+  }
+
+  setTimeout(gameLoop, 1000 / config.fps);
+};
 gameLoop();
 
 httpServer.listen(443, () => {

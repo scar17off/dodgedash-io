@@ -7,6 +7,7 @@
     "areas": {
       "0": {
         "background": "black",
+        "deathTimer": 10,
         "size": {
           "width": 4000,
           "height": 480
@@ -22,6 +23,7 @@
       },
       "1": {
         "background": "black",
+        "deathTimer": 10,
         "size": {
           "width": 4000,
           "height": 480
@@ -43,6 +45,7 @@
       },
       "2": {
         "background": "black",
+        "deathTimer": 10,
         "size": {
           "width": 4000,
           "height": 480

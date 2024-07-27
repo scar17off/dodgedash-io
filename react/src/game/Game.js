@@ -11,10 +11,11 @@ const Game = ({ nickname, hero }) => {
   const rendererRef = useRef(null);
   const lastSentInputRef = useRef(null);
   const initialState = {
-    localPlayer: { x: 0, y: 0, speed: 0, radius: 0, name: nickname },
+    localPlayer: { x: 0, y: 0, speed: 0, radius: 0, name: nickname, areaNumber: 0 },
     players: [],
     entities: [],
-    area: null
+    area: null,
+    selfId: null
   };
   const gameStateRef = useRef(initialState);
   const [gameState, setGameState] = useState(initialState);
@@ -26,17 +27,8 @@ const Game = ({ nickname, hero }) => {
       gameStateRef.current = newState;
       return newState;
     });
+    window.gameState = gameState;
   }, []);
-
-  const PLAYER_TIMEOUT = 5000; // 5 seconds
-
-  const cleanupPlayers = useCallback(() => {
-    const now = Date.now();
-    updateGameState(prevState => ({
-      ...prevState,
-      players: prevState.players.filter(player => now - player.lastUpdate < PLAYER_TIMEOUT)
-    }));
-  }, [updateGameState]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -89,18 +81,21 @@ const Game = ({ nickname, hero }) => {
       setAreaDataReceived(true);
     });
 
-    socket.on('playerData', (playerData) => {
-      updateGameState(prevState => ({
-        ...prevState,
-        localPlayer: { ...prevState.localPlayer, ...playerData }
-      }));
+    socket.on('playersUpdate', (playersData) => {
+      updateGameState(prevState => {
+        const localPlayer = playersData.find(p => p.id === prevState.selfId);
+        const otherPlayers = playersData.filter(p => p.id !== prevState.selfId);
+        
+        return {
+          ...prevState,
+          localPlayer: localPlayer ? { ...prevState.localPlayer, ...localPlayer } : prevState.localPlayer,
+          players: otherPlayers
+        };
+      });
     });
 
-    socket.on('playerUpdate', (playerData) => {
-      updateGameState(prevState => ({
-        ...prevState,
-        localPlayer: { ...prevState.localPlayer, ...playerData }
-      }));
+    socket.on('selfId', (selfId) => {
+      updateGameState(prevState => ({ ...prevState, selfId }));
     });
 
     socket.on('entityUpdate', (entityData) => {
@@ -111,7 +106,8 @@ const Game = ({ nickname, hero }) => {
       updateGameState(prevState => ({
         ...prevState,
         area: areaData,
-        localPlayer: { ...prevState.localPlayer, ...playerUpdate }
+        localPlayer: { ...prevState.localPlayer, ...playerUpdate },
+        players: [] // Clear other players when changing areas
       }));
     });
 
@@ -123,23 +119,33 @@ const Game = ({ nickname, hero }) => {
     });
 
     socket.on('playerJoined', (playerData) => {
-      updateGameState(prevState => ({
-        ...prevState,
-        players: [...prevState.players, playerData]
-      }));
+      updateGameState(prevState => {
+        if (playerData.areaNumber === prevState.localPlayer.areaNumber) {
+          return {
+            ...prevState,
+            players: [...prevState.players, playerData]
+          };
+        }
+        return prevState;
+      });
     });
 
     socket.on('newPlayer', (playerData) => {
-      updateGameState(prevState => ({
-        ...prevState,
-        players: [...prevState.players, playerData]
-      }));
+      updateGameState(prevState => {
+        if (playerData.areaNumber === prevState.localPlayer.areaNumber) {
+          return {
+            ...prevState,
+            players: [...prevState.players, playerData]
+          };
+        }
+        return prevState;
+      });
     });
 
     socket.on('existingPlayers', (players) => {
       updateGameState(prevState => ({
         ...prevState,
-        players: players
+        players: players.filter(p => p.areaNumber === prevState.localPlayer.areaNumber)
       }));
     });
 
@@ -185,14 +191,11 @@ const Game = ({ nickname, hero }) => {
 
     gameLoop();
 
-    const cleanupInterval = setInterval(cleanupPlayers, 1000);
-
     return () => {
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('wheel', handleWheel);
       window.removeEventListener('keydown', handleKeyDown);
       socket.off('areaData');
-      socket.off('playerData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');
       socket.off('areaChanged');
@@ -202,9 +205,8 @@ const Game = ({ nickname, hero }) => {
       socket.off('existingPlayers');
       socket.off('playerMove');
       socket.off('playerDisconnected');
-      clearInterval(cleanupInterval);
     };
-  }, [nickname, hero, updateGameState, cleanupPlayers]);
+  }, [nickname, hero, updateGameState]);
 
   return <canvas ref={canvasRef} style={{ display: 'block' }} />;
 };

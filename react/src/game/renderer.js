@@ -14,8 +14,6 @@ class Renderer {
       return;
     }
 
-    console.log('Rendering area:', area); // Add this line for debugging
-
     // Draw border
     this.context.strokeStyle = 'white';
     this.context.lineWidth = 2;
@@ -113,7 +111,6 @@ class Renderer {
     this.camera.applyTo(this.context);
     
     if (gameState && gameState.area) {
-      console.log('Rendering area:', JSON.stringify(gameState.area, null, 2));
       this.renderArea(gameState.area, options);
     } else {
       console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
@@ -129,7 +126,7 @@ class Renderer {
     }
     if (gameState && gameState.players && gameState.players.length > 0) {
       for (const player of gameState.players) {
-        if (player.id !== gameState.localPlayer?.id && player.id !== undefined) {
+        if (player.id !== gameState.localPlayer?.id && player.areaNumber === gameState.localPlayer.areaNumber) {
           this.renderPlayer(player);
         }
       }

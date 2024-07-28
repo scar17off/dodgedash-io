@@ -37,7 +37,7 @@
           },
           {
             "type": "Zigzag",
-            "amount": 5,
+            "amount": 4,
             "speed": 3,
             "radius": 15
           }
@@ -62,18 +62,6 @@
             "amount": 4,
             "speed": 3.5,
             "radius": 15
-          },
-          {
-            "type": "Chaser",
-            "amount": 3,
-            "speed": 2,
-            "radius": 12
-          },
-          {
-            "type": "Teleporter",
-            "amount": 2,
-            "speed": 1,
-            "radius": 18
           }
         ]
       },
@@ -92,10 +80,16 @@
             "radius": 20
           },
           {
-            "type": "Connectus",
+            "type": "Zigzag",
+            "amount": 4,
+            "speed": 3,
+            "radius": 15
+          },
+          {
+            "type": "Chaser",
             "amount": 2,
-            "speed": 1.75,
-            "radius": 10
+            "speed": 2,
+            "radius": 15
           }
         ]
       },
@@ -109,9 +103,15 @@
         "entities": [
           {
             "type": "Normal",
-            "amount": 5,
+            "amount": 15,
             "speed": 2.5,
             "radius": 30
+          },
+          {
+            "type": "Teleporter",
+            "amount": 2,
+            "speed": 1,
+            "radius": 18
           }
         ]
       }

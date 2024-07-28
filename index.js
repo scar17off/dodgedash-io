@@ -227,7 +227,6 @@ const gameLoop = () => {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
       // Update players
-      console.log(area.players.map(p => p.id));
       for (const player of area.players) {
         player.update(area);
         

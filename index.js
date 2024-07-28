@@ -67,7 +67,6 @@ io.on("connection", socket => {
       regions[player.regionName].loadArea(player.areaNumber);
       currentArea = regions[player.regionName].getArea(player.areaNumber);
     }
-    currentArea.players.push(player);
     player.position = player.getRandomSpawnPosition(currentArea);
     
     const areaData = currentArea.getAreaData();
@@ -91,6 +90,10 @@ io.on("connection", socket => {
         name: p.name
       }));
     socket.emit('existingPlayers', existingPlayers);
+
+    if (!currentArea.players.includes(player)) {
+      currentArea.players.push(player);
+    }
 
     socket.join(player.regionName + '-' + player.areaNumber);
   });
@@ -160,7 +163,10 @@ function changePlayerArea(player, direction) {
       currentRegion.loadArea(newAreaNumber);
       newArea = currentRegion.getArea(newAreaNumber);
     }
-    newArea.players.push(player);
+
+    if (!newArea.players.includes(player)) {
+      newArea.players.push(player);
+    }
 
     const relativeY = (player.position.y - currentArea.position.y) / currentArea.size.height;
     const teleportZoneWidth = 50;
@@ -221,6 +227,7 @@ const gameLoop = () => {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
       // Update players
+      console.log(area.players.map(p => p.id));
       for (const player of area.players) {
         player.update(area);
         
@@ -242,7 +249,7 @@ const gameLoop = () => {
 
         // Check for collisions with entities in the same area
         for (const entity of area.entities) {
-          if (entity.collideCheck(player)) {
+          if (entity.collideCheck(player) && player.deathTimer == -1) {
             player.deathTimer = area.deathTimer * 1000;
             break; // Exit the loop once a collision is detected
           }

@@ -28,6 +28,8 @@ class Client {
      * @property {string} ip - The client's IP address.
      */
     this.ip = req.connection.remoteAddress;
+
+    server.clients.push(this);
   }
 
   /**

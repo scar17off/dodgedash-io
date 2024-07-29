@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"chalk": "^4.1.2",
 		"concurrently": "^8.2.2",
 		"express": "^4.19.2",
 		"socket.io": "^4.7.5",
@@ -15,16 +16,16 @@
 		"dev": "concurrently \"cd react && npm run start\" \"nodemon index.js\""
 	},
 	"keywords": [
-    "dodgedash",
-    "multiplayer",
-    "game",
-    "nodejs",
-    "javascript",
-    "react",
-    "socket.io",
-    "express",
-    "sqlite3"
-  ],
+		"dodgedash",
+		"multiplayer",
+		"game",
+		"nodejs",
+		"javascript",
+		"react",
+		"socket.io",
+		"express",
+		"sqlite3"
+	],
 	"author": "scar17off",
 	"license": "MIT"
 }

@@ -21,7 +21,6 @@ class Region {
 
   unloadArea(areaNumber) {
     if (this.areas[areaNumber] && this.areas[areaNumber].players.length === 0) {
-      console.log(`Unloading area ${areaNumber} in region ${this.regionName}`);
       delete this.areas[areaNumber];
     } else if (this.areas[areaNumber]) {
       console.log(`Attempted to unload area ${areaNumber} in region ${this.regionName}, but it still has ${this.areas[areaNumber].players.length} players`);

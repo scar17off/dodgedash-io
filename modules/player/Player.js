@@ -152,6 +152,18 @@ class Player {
     );
   }
 
+  /**
+   * Retrieves the player's data.
+   * @returns {Object} An object containing the player's data.
+   * @property {string} id - The player's ID.
+   * @property {Object} position - The player's position.
+   * @property {number} radius - The player's radius.
+   * @property {number} speed - The player's base speed.
+   * @property {string} color - The player's color.
+   * @property {string} name - The player's name.
+   * @property {number} areaNumber - The player's current area number.
+   * @property {number} deathTimer - The player's death timer.
+   */
   getPlayerData() {
     return {
       id: this.id,

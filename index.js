@@ -10,6 +10,9 @@ const Region = require("./modules/region/Region");
 const Client = require("./modules/player/Client");
 const { heroType } = require("./modules/protocol.json");
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
+const { log } = require("./modules/utils");
+
+log("INFO", "Starting server...");
 
 const app = express();
 app.use(cors());
@@ -22,7 +25,7 @@ const io = new Server(httpServer, {
 });
 
 global.server = {
-  lastId: 0,
+  lastId: 1,
   clients: []
 }
 
@@ -55,9 +58,8 @@ function sendPlayerUpdates() {
 }
 
 io.on("connection", socket => {
-  const client = new Client(socket, socket.request);
-  const player = client.player;
-  server.clients.push(client);
+  const client = new Client(socket, socket.request), player = client.player;
+  log("INFO", `Client ${client.player.id} connected`);
   
   socket.on('spawn', ({ nickname, hero }) => {
     player.name = nickname;
@@ -113,6 +115,7 @@ io.on("connection", socket => {
     const index = server.clients.indexOf(client);
     if (index !== -1) {
       server.clients.splice(index, 1);
+      log("INFO", `Client ${client.player.id} disconnected`);
       
       // Remove player from the current area
       let currentArea = regions[player.regionName]?.getArea(player.areaNumber);
@@ -288,5 +291,5 @@ const gameLoop = () => {
 gameLoop();
 
 httpServer.listen(443, () => {
-  console.log("Server is running on port 443");
+  log("INFO", "Server is running on port 443");
 });

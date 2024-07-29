@@ -112,6 +112,7 @@ class Renderer {
   }
 
   renderEntity(entity) {
+    if(!entity.position) return;
     this.context.beginPath();
     this.context.arc(entity.position.x, entity.position.y, entity.radius, 0, 2 * Math.PI);
     this.context.fillStyle = entity.color;

@@ -1,5 +1,22 @@
 const Entity = require('./Entity');
 
+function mineBehavior(area) {
+  const currentTime = Date.now();
+  if (!this.exploded) {
+    const playerInRange = area.players.find(player => {
+      const dx = player.position.x - this.position.x;
+      const dy = player.position.y - this.position.y;
+      return Math.sqrt(dx * dx + dy * dy) < this.detectionRange;
+    });
+
+    if (playerInRange) {
+      this.explode(playerInRange, area);
+    }
+  } else if (currentTime - this.lastExplodeTime >= this.reloadTime) {
+    this.exploded = false;
+  }
+}
+
 class Mine extends Entity {
   constructor() {
     super();
@@ -13,24 +30,7 @@ class Mine extends Entity {
     this.area = null;
     this.update = (area) => {
       this.area = area;
-      this.mineCheck(area);
-    }
-  }
-
-  mineCheck(area) {
-    const currentTime = Date.now();
-    if (!this.exploded) {
-      const playerInRange = area.players.find(player => {
-        const dx = player.position.x - this.position.x;
-        const dy = player.position.y - this.position.y;
-        return Math.sqrt(dx * dx + dy * dy) < this.detectionRange;
-      });
-
-      if (playerInRange) {
-        this.explode(playerInRange, area);
-      }
-    } else if (currentTime - this.lastExplodeTime >= this.reloadTime) {
-      this.exploded = false;
+      mineBehavior(area);
     }
   }
 

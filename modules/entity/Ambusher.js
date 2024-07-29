@@ -17,7 +17,7 @@ class Ambusher extends Entity {
     const playerInRange = area.players.find(player => {
       const dx = player.position.x - this.position.x;
       const dy = player.position.y - this.position.y;
-      return Math.sqrt(dx * dx + dy * dy) < this.detectionRange;
+      return player.deathTimer === -1 && Math.sqrt(dx * dx + dy * dy) < this.detectionRange;
     });
 
     if (playerInRange) {
@@ -46,7 +46,7 @@ class Ambusher extends Entity {
     return {
       id: this.id,
       entityType: this.entityType,
-      position: this.hidden ? { x: 0, y: 0 } : this.position,
+      position: this.hidden ? null : this.position,
       radius: this.radius,
       color: this.color
     };

@@ -11,7 +11,16 @@ export function setupControls(canvas) {
     'KeyW': 'w',
     'KeyA': 'a',
     'KeyS': 's',
-    'KeyD': 'd'
+    'KeyD': 'd',
+    'KeyZ': 'ability1',
+    'KeyJ': 'ability1',
+    'KeyX': 'ability2',
+    'KeyK': 'ability2',
+    'Digit1': 'upgrade1',
+    'Digit2': 'upgrade2',
+    'Digit3': 'upgrade3',
+    'Digit4': 'upgrade4',
+    'Digit5': 'upgrade5'
   };
 
   canvas.addEventListener('mousemove', (e) => {
@@ -25,6 +34,15 @@ export function setupControls(canvas) {
     if (key) {
       controls.keys[key] = true;
       socket.emit('keyPress', { key, pressed: true });
+      
+      const abilityMatch = key.match(/^ability(\d)$/);
+      const upgradeMatch = key.match(/^upgrade(\d)$/);
+
+      if (abilityMatch) {
+        socket.emit('abilityUse', parseInt(abilityMatch[1]) - 1);
+      } else if (upgradeMatch) {
+        socket.emit('abilityUpgrade', parseInt(upgradeMatch[1]) - 1);
+      }
     }
   });
 

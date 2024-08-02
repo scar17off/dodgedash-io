@@ -1,6 +1,27 @@
 const entityTypes = require('../entity/Enemies');
+const Player = require('../player/Player');
 
+/**
+ * Represents an area in the game.
+ */
 class Area {
+  /**
+   * Creates a new area instance.
+   * @param {Object} data - The data for the area.
+   * @param {Object} data.position - The position of the area.
+   * @param {number} data.position.x - The x-coordinate of the area.
+   * @param {number} data.position.y - The y-coordinate of the area.
+   * @param {Object} data.size - The size of the area.
+   * @param {number} data.size.width - The width of the area.
+   * @param {number} data.size.height - The height of the area.
+   * @param {string} data.background - The background color of the area.
+   * @param {number} [data.deathTimer] - The death timer for the area.
+   * @param {Array} [data.entities] - The entities in the area.
+   * @param {string} [regionName='Alpha'] - The name of the region the area belongs to.
+   * @param {number} [areaNumber=0] - The number of the area.
+   * @param {Array<Player>} [players] - The players in the area.
+   * @param {Array} [abilityCreations] - The ability creations in the area.
+   */
   constructor(data = {
     position: { x: 0, y: 0 },
     size: { width: 1000, height: 480 },
@@ -14,6 +35,7 @@ class Area {
     this.deathTimer = data.deathTimer;
     this.players = [];
     this.entities = [];
+    this.abilityCreations = [];
     this.border = [
       { x: this.position.x, y: this.position.y },
       { x: this.position.x + this.size.width, y: this.position.y },

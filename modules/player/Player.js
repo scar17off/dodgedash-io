@@ -1,24 +1,126 @@
 const { isWithinBorderOrStartZone } = require("../utils");
 const { heroType } = require("../protocol.json");
+const IceWall = require("../ability/IceWall");
+const Ability = require("../ability/Ability");
 
+const defaultHero = heroType[0];
+
+/**
+ * Represents a player in the game.
+ */
 class Player {
+  /**
+   * Creates a new player instance.
+   * @param {Object} socket - The socket associated with the player.
+   */
   constructor(socket) {
+    /**
+     * The unique ID of the player.
+     * @type {number}
+     */
     this.id = server.lastId++;
+
+    /**
+     * The socket associated with the player.
+     * @type {Object}
+     */
     this.socket = socket;
+
+    /**
+     * The position of the player.
+     * @type {Object}
+     * @property {number} x - The x-coordinate of the player.
+     * @property {number} y - The y-coordinate of the player.
+     */
     this.position = { x: 0, y: 0 };
+
+    /**
+     * The radius of the player.
+     * @type {number}
+     */
     this.radius = 15;
+
+    /**
+     * The base speed of the player.
+     * @type {number}
+     */
     this.baseSpeed = 5;
-    // this.baseSpeed = 12;
-    this._heroType = heroType[0].id;
-    this.color = heroType[0].color;
+
+    /**
+     * The hero type ID of the player.
+     * @type {number}
+     * @private
+     */
+    this._heroType = defaultHero.id;
+
+    /**
+     * The color of the player.
+     * @type {string}
+     */
+    this.color = defaultHero.color;
+
+    /**
+     * The input state of the player.
+     * @type {Object}
+     * @property {Object} mouse - The mouse position.
+     * @property {number} mouse.x - The x-coordinate of the mouse.
+     * @property {number} mouse.y - The y-coordinate of the mouse.
+     * @property {Object} keys - The state of the movement keys.
+     * @property {boolean} keys.w - The state of the 'w' key.
+     * @property {boolean} keys.a - The state of the 'a' key.
+     * @property {boolean} keys.s - The state of the 's' key.
+     * @property {boolean} keys.d - The state of the 'd' key.
+     * @property {boolean} mouseMovement - Whether the mouse is being moved.
+     */
     this.input = {
       mouse: { x: 0, y: 0 },
       keys: { w: false, a: false, s: false, d: false },
       mouseMovement: false
     };
+
+    /**
+     * The name of the region the player is in.
+     * @type {string}
+     */
     this.regionName = "Alpha";
+
+    /**
+     * The area number the player is in.
+     * @type {number}
+     */
     this.areaNumber = 0;
+
+    /**
+     * The death timer of the player.
+     * @type {number}
+     */
     this.deathTimer = -1;
+
+    /**
+     * The maximum energy of the player.
+     * @type {number}
+     */
+    this.maxEnergy = 30;
+
+    /**
+     * The current energy of the player.
+     * @type {number}
+     */
+    this.energy = 30;
+
+    /**
+     * The energy regeneration rate of the player.
+     * @type {number}
+     */
+    this.energyRegen = 1;
+
+    /**
+     * The abilities of the player.
+     * @type {Array<Ability>}
+     */
+    this.abilities = [
+      new IceWall()
+    ];
   }
 
   respawn() {

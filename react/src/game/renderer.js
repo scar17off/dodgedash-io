@@ -136,6 +136,13 @@ class Renderer {
     }
   }
 
+  renderAbilityCreations(ability) {
+    if(ability.creationType == "Ice Wall") {
+      this.context.fillStyle = ability.color;
+      this.context.fillRect(ability.position.x, ability.position.y, ability.size.width, ability.size.height);
+    }
+  }
+
   render(gameState) {
     const { width, height } = this.camera;
     this.context.fillStyle = this.options.darkMode ? 'black' : 'white';
@@ -149,6 +156,11 @@ class Renderer {
       this.renderArea(gameState.area);
     } else {
       console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
+    }
+
+    // Render abilities
+    if(gameState && gameState.abilityCreations && gameState.abilityCreations.length > 0) {
+      for(const abilityCreation of gameState.abilityCreations) this.renderAbilityCreations(abilityCreation);
     }
     
     // Render local player

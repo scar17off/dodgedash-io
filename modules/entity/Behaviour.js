@@ -48,6 +48,18 @@ const checkCollisions = (entity, area, newX, newY) => {
     newY = finishZone.position.y + finishZone.size.height + entity.radius;
   }
 
+  // Check for collisions with ability creations
+  if (area.abilityCreations) {
+    for (const ability of area.abilityCreations) {
+      if (ability.collideCheck) {
+        const result = ability.collideCheck(entity, newX, newY);
+        if (result) {
+          ({ newX, newY } = result);
+        }
+      }
+    }
+  }
+
   // Ensure the entity stays within the area bounds
   newX = Math.max(area.position.x + entity.radius, Math.min(newX, area.position.x + area.size.width - entity.radius));
   newY = Math.max(area.position.y + entity.radius, Math.min(newY, area.position.y + area.size.height - entity.radius));

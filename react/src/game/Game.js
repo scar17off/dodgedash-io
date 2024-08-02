@@ -14,6 +14,7 @@ const Game = ({ nickname, hero }) => {
     localPlayer: { position: { x: 0, y: 0 }, speed: 0, radius: 0, name: nickname, areaNumber: 0 },
     players: [],
     entities: [],
+    abilityCreations: [],
     area: null,
     selfId: null
   };
@@ -92,6 +93,10 @@ const Game = ({ nickname, hero }) => {
     socket.on('entityUpdate', (entityData) => {
       updateGameState(prevState => ({ ...prevState, entities: entityData }));
     });
+
+    socket.on('abilityCreationUpdate', (abilityCreations) => {
+      updateGameState(prevState => ({ ...prevState, abilityCreations }));
+    })
 
     socket.on('areaChanged', ({ areaData, playerUpdate }) => {
       updateGameState(prevState => ({

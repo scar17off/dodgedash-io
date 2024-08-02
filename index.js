@@ -24,10 +24,23 @@ const io = new Server(httpServer, {
   }
 });
 
+/**
+ * @global
+ * @type {Object}
+ * @property {number} lastId - The last assigned ID.
+ * @property {Array<Object>} clients - The list of connected clients.
+ * @property {Object<string, Region>} regions - The regions in the game.
+ */
 global.server = {
   lastId: 1,
-  clients: []
-}
+  clients: [],
+  regions: {}
+};
+
+/**
+ * @type {Object<string, Region>}
+ */
+const regions = global.server.regions;
 
 function copyProtocolToReact() {
   const sourceFile = path.join(__dirname, 'modules', 'protocol.json');
@@ -43,7 +56,6 @@ function copyProtocolToReact() {
 copyProtocolToReact();
 
 // Initialize regions
-const regions = {};
 for (const [regionName, regionData] of Object.entries(areasData)) {
   regions[regionName] = new Region(regionData, regionName);
 }
@@ -58,7 +70,14 @@ function sendPlayerUpdates() {
 }
 
 io.on("connection", socket => {
-  const client = new Client(socket, socket.request), player = client.player;
+  /**
+   * Handles a new client connection.
+   * @param {Object} socket - The socket associated with the client.
+   * @param {Object} request - The request object associated with the socket.
+   * @returns {Object} The player associated with the client.
+   */
+  const client = new Client(socket, socket.request);
+  const player = client.player;
   log("INFO", `Client ${client.player.id} connected`);
   
   socket.on('spawn', ({ nickname, hero }) => {
@@ -107,8 +126,23 @@ io.on("connection", socket => {
       currentArea = regions[player.regionName].getArea(player.areaNumber);
     }
     player.handleInput(input, currentArea);
-    
-    // We'll send updates in bulk, so no need to emit here
+  });
+
+  socket.on('abilityUse', (abilityNumber) => {
+    if(!player.abilities[abilityNumber]) {
+      log("ERROR", "No ability found with number " + abilityNumber);
+      return;
+    }
+    if(player.deathTimer !== -1) return;
+
+    const currentArea = regions[player.regionName].getArea(player.areaNumber);
+    player.abilities[abilityNumber].use(player, currentArea);
+  });
+
+  socket.on('abilityUpgrade', (abilityNumber) => {
+    const currentArea = regions[player.regionName].getArea(player.areaNumber);
+    player.abilities[abilityNumber].upgrade();
+    socket.emit("abilityUpgraded", abilityNumber, player.abilities[abilityNumber].upgradeLevel);
   });
 
   socket.on('disconnect', () => {
@@ -117,7 +151,6 @@ io.on("connection", socket => {
       server.clients.splice(index, 1);
       log("INFO", `Client ${client.player.id} disconnected`);
       
-      // Remove player from the current area
       let currentArea = regions[player.regionName]?.getArea(player.areaNumber);
       if (currentArea) {
         const playerIndex = currentArea.players.indexOf(player);
@@ -125,7 +158,6 @@ io.on("connection", socket => {
           currentArea.players.splice(playerIndex, 1);
         }
         
-        // Notify players in the same area about the disconnection
         io.emit('playerDisconnected', player.id);
       }
     }
@@ -232,6 +264,11 @@ const gameLoop = () => {
       // Update players
       for (const player of area.players) {
         player.update(area);
+
+        // Update energy
+        if(player.energy < player.maxEnergy) {
+          player.energy += player.energyRegen;
+        }
         
         // Check if player should change areas
         if (player.isInNextAreaZone(area)) {
@@ -268,6 +305,11 @@ const gameLoop = () => {
         }
       }
 
+      // Update ability creations
+      for (const abilityCreation of area.abilityCreations) {
+        abilityCreation.update(area);
+      }
+
       // Update entities
       for (const entity of area.entities) {
         entity.update(area);
@@ -283,6 +325,14 @@ const gameLoop = () => {
     for (const area of region.getLoadedAreas()) {
       const entityData = area.entities.map(entity => entity.getEntityData());
       io.to(`${region.regionName}-${area.areaNumber}`).emit('entityUpdate', entityData);
+    }
+  }
+
+   // Send ability creation updates
+   for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      const abilityCreationData = area.abilityCreations.map(entity => entity.getCreationData());
+      io.to(`${region.regionName}-${area.areaNumber}`).emit('abilityCreationUpdate', abilityCreationData);
     }
   }
 

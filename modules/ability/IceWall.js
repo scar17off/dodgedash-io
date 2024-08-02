@@ -104,14 +104,16 @@ class IceWall extends Ability {
       "Cooldown": [6, 5.5, 5, 4.5, 4],
       "Wall duration": [3, 3.5, 4, 4.5, 5]
     }
+    this.energyCost = 10;
   }
 
   use(player, area) {
     const currentTime = Date.now();
     const cooldown = this.getUpgradeLevel("Cooldown");
 
-    if (currentTime - this.lastUse >= cooldown * 1000) {
+    if (currentTime - this.lastUse >= cooldown * 1000 && player.energy >= this.energyCost) {
       super.use();
+      player.energy -= this.energyCost;
       const wall = new Wall(player);
       area.abilityCreations.push(wall);
     }

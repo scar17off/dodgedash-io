@@ -108,7 +108,31 @@ class Renderer {
       this.context.fillText(Math.floor(player.deathTimer / 1000), player.position.x, player.position.y + 5);
     }
 
-    this.context.globalAlpha = 1.0; // Reset alpha
+    // Render energy bar
+    const { position, radius, energy, maxEnergy } = player;
+    this.renderEnergyBar({ position, radius, energy, maxEnergy });
+
+    this.context.globalAlpha = 1.0;
+  }
+
+  renderEnergyBar({ position, radius, energy, maxEnergy }) {
+    this.context.globalAlpha = 0.65;
+
+    const barWidth = 40;
+    const barHeight = 8;
+    const barX = position.x - barWidth / 2;
+    const barY = position.y + (radius || 25) + 5;
+    const fillWidth = (energy / maxEnergy) * barWidth;
+
+    // Draw background bar
+    this.context.fillStyle = 'gray';
+    this.context.fillRect(barX, barY, barWidth, barHeight);
+
+    // Draw filled bar
+    this.context.fillStyle = 'blue';
+    this.context.fillRect(barX, barY, fillWidth, barHeight);
+
+    this.context.globalAlpha = 1.0;
   }
 
   renderEntity(entity) {

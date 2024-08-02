@@ -275,7 +275,9 @@ class Player {
       color: this.color,
       name: this.name,
       areaNumber: this.areaNumber,
-      deathTimer: this.deathTimer
+      deathTimer: this.deathTimer,
+      energy: this.energy,
+      maxEnergy: this.maxEnergy
     };
   }
 }

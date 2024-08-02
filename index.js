@@ -267,7 +267,7 @@ const gameLoop = () => {
 
         // Update energy
         if(player.energy < player.maxEnergy) {
-          player.energy += player.energyRegen;
+          player.energy += player.energyRegen / (config.fps / 2);
         }
         
         // Check if player should change areas

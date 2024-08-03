@@ -3,6 +3,7 @@ import { setupControls } from './controls';
 import socket from './network';
 import Camera from './camera';
 import Renderer from './renderer';
+import HeroPanel from './HeroPanel';
 
 const Game = ({ nickname, hero }) => {
   const canvasRef = useRef(null);
@@ -20,6 +21,15 @@ const Game = ({ nickname, hero }) => {
   };
   const gameStateRef = useRef(initialState);
   const [gameState, setGameState] = useState(initialState);
+  const [heroStats, setHeroStats] = useState({
+    name: hero,
+    nickname: gameState.localPlayer.name,
+    level: 1,
+    speed: 5,
+    energy: 30,
+    maxEnergy: 30,
+    regen: 1
+  });
 
   const updateGameState = useCallback((updater) => {
     setGameState(prevState => {
@@ -96,7 +106,20 @@ const Game = ({ nickname, hero }) => {
 
     socket.on('abilityCreationUpdate', (abilityCreations) => {
       updateGameState(prevState => ({ ...prevState, abilityCreations }));
-    })
+    });
+
+    socket.on('heroUpdate', (updatedHeroStats) => {
+      setHeroStats(prevStats => ({
+        ...prevStats,
+        ...updatedHeroStats,
+        speed: updatedHeroStats.speed !== undefined 
+          ? Number(updatedHeroStats.speed) 
+          : prevStats.speed,
+        regen: updatedHeroStats.energyRegen !== undefined 
+          ? Number(updatedHeroStats.energyRegen) 
+          : prevStats.regen
+      }));
+    });
 
     socket.on('areaChanged', ({ areaData, playerUpdate }) => {
       updateGameState(prevState => ({
@@ -193,6 +216,7 @@ const Game = ({ nickname, hero }) => {
       socket.off('areaData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');
+      socket.off('heroUpdate');
       socket.off('areaChanged');
       socket.off('playerLeft');
       socket.off('playerJoined');
@@ -203,7 +227,12 @@ const Game = ({ nickname, hero }) => {
     };
   }, [nickname, hero, updateGameState]);
 
-  return <canvas ref={canvasRef} style={{ display: 'block' }} />;
+  return (
+    <div style={{ position: 'relative' }}>
+      <HeroPanel hero={heroStats} />
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
+    </div>
+  );
 };
 
 function isEqual(obj1, obj2) {

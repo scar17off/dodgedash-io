@@ -1,3 +1,8 @@
 {
-  "fps": 60
+  "fps": 60,
+  "upgrades": {
+    "maxSpeed": 16,
+    "maxEnergy": 150,
+    "maxEnergyRegen": 8
+  }
 }

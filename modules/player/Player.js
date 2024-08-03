@@ -1,6 +1,7 @@
 const { isWithinBorderOrStartZone } = require("../utils");
 const { heroType } = require("../protocol.json");
-const IceWall = require("../ability/IceWall");
+
+const abilityTypes = require("../ability/Abilities");
 const Ability = require("../ability/Ability");
 
 const defaultHero = heroType[0];
@@ -119,7 +120,8 @@ class Player {
      * @type {Array<Ability>}
      */
     this.abilities = [
-      new IceWall()
+      new abilityTypes.IceWall(),
+      new abilityTypes.ColdImmunity()
     ];
   }
 
@@ -154,6 +156,7 @@ class Player {
     if (hero) {
       this._heroType = newHeroTypeId;
       this.color = hero.color;
+      this.abilities = hero.abilities.map(ability => new abilityTypes[ability.name.replace(/\s+/g, '')]());
     } else {
       console.error(`Hero type with id ${newHeroTypeId} not found`);
     }
@@ -252,6 +255,31 @@ class Player {
       this.position.y + this.radius >= area.previousAreaZone.position.y &&
       this.position.y - this.radius <= area.previousAreaZone.position.y + area.previousAreaZone.size.height
     );
+  }
+
+  /**
+   * Retrieves the hero's data.
+   * @returns {Object} An object containing the hero's data.
+   * @property {string} name - The hero's name.
+   * @property {number} level - The hero's level.
+   * @property {string} nickname - The hero's nickname.
+   * @property {number} speed - The hero's speed.
+   * @property {number} energy - The hero's current energy.
+   * @property {number} maxEnergy - The hero's maximum energy.
+   * @property {number} regen - The hero's regeneration rate.
+   * @property {Array} abilities - The hero's abilities.
+   */
+  getHeroData() {
+    return {
+      name: this.name,
+      level: this.level,
+      nickname: this.nickname,
+      speed: this.baseSpeed,
+      energy: this.energy,
+      maxEnergy: this.maxEnergy,
+      regen: this.regen,
+      abilities: this.abilities
+    };
   }
 
   /**

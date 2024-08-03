@@ -139,10 +139,44 @@ io.on("connection", socket => {
     player.abilities[abilityNumber].use(player, currentArea);
   });
 
-  socket.on('abilityUpgrade', (abilityNumber) => {
-    const currentArea = regions[player.regionName].getArea(player.areaNumber);
-    player.abilities[abilityNumber].upgrade();
-    socket.emit("abilityUpgraded", abilityNumber, player.abilities[abilityNumber].upgradeLevel);
+  let lastUpgradeTime = 0;
+  const UPGRADE_COOLDOWN = 30; // 500ms cooldown between upgrades
+
+  socket.on('upgrade', (upgradeNumber) => {
+    const currentTime = Date.now();
+    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) {
+      return; // Ignore upgrade request if cooldown hasn't passed
+    }
+
+    const stats = 3;
+    const abilities = player.abilities.length;
+    const updatedProperties = {};
+
+    // Upgrade stats
+    if (upgradeNumber === 0) { // Speed
+      if (player.baseSpeed < config.upgrades.maxSpeed) {
+        player.baseSpeed += 0.5;
+        updatedProperties.speed = player.baseSpeed;
+      }
+    } else if (upgradeNumber === 1) { // Max Energy
+      if (player.maxEnergy < config.upgrades.maxEnergy) {
+        player.maxEnergy += 5;
+        updatedProperties.maxEnergy = player.maxEnergy;
+      }
+    } else if (upgradeNumber === 2) { // Regen
+      if (player.energyRegen < config.upgrades.maxEnergyRegen) {
+        player.energyRegen += 0.5;
+        updatedProperties.energyRegen = player.energyRegen;
+      }
+    } else if (player.abilities[upgradeNumber - stats - 1]) { // Upgrade an ability
+      player.abilities[upgradeNumber - abilities - 1].upgrade();
+      updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+    }
+
+    if (Object.keys(updatedProperties).length > 0) {
+      socket.emit('heroUpdate', updatedProperties);
+      lastUpgradeTime = currentTime; // Update the last upgrade time
+    }
   });
 
   socket.on('disconnect', () => {
@@ -268,6 +302,12 @@ const gameLoop = () => {
         // Update energy
         if(player.energy < player.maxEnergy) {
           player.energy += player.energyRegen / (config.fps / 2);
+          const client = server.clients.find(c => c.id === player.id);
+          if (client) {
+            client.socket.emit('heroUpdate', {
+              energy: player.energy
+            });
+          }
         }
         
         // Check if player should change areas
@@ -279,7 +319,7 @@ const gameLoop = () => {
 
         // Timer update and respawn
         if (player.deathTimer !== -1) {
-          player.deathTimer = Math.max(0, player.deathTimer - 1000 / config.fps / 1.5);
+          player.deathTimer = Math.max(0, player.deathTimer - 1000 / 45);
           if (player.deathTimer <= 0) {
             player.deathTimer = -1;
             player.position = player.getRandomSpawnPosition(area);

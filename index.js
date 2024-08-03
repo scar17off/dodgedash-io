@@ -140,13 +140,10 @@ io.on("connection", socket => {
   });
 
   let lastUpgradeTime = 0;
-  const UPGRADE_COOLDOWN = 30; // 500ms cooldown between upgrades
-
+  const UPGRADE_COOLDOWN = 30;
   socket.on('upgrade', (upgradeNumber) => {
     const currentTime = Date.now();
-    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) {
-      return; // Ignore upgrade request if cooldown hasn't passed
-    }
+    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) return;
 
     const stats = 3;
     const abilities = player.abilities.length;

@@ -52,7 +52,7 @@ class AbilityCreation {
 
   /**
    * Gets the creation data for this ability creation.
-   * @returns {{creationType: string|null, position: {x: number, y: number}, color: string}}
+   * @returns {{creationType: (string|null), position: {x: number, y: number}, color: string}}
    */
   getCreationData() {
     return {

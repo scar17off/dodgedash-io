@@ -13,13 +13,13 @@ class Mine extends Entity {
     this.area = null;
     this.update = (area) => {
       this.area = area;
-      mineBehavior(area);
+      this.mineBehavior(area);
     }
   }
 
   mineBehavior(area) {
     const currentTime = Date.now();
-    
+
     if (!this.exploded) {
       const playerInRange = area.players.find(player => {
         const dx = player.position.x - this.position.x;

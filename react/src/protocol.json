@@ -1,5 +1,5 @@
 {
-  "wsUrl": "ws://localhost:443",
+  "wsUrl": "ws://26.218.217.16:443",
   "heroType": [
     {
       "id": 0,

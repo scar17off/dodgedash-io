@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
+import protocol from "../protocol.json";
 
-const socket = io("http://localhost:443");
+const socket = io(protocol.wsUrl);
 
 export default socket;

@@ -389,7 +389,7 @@
           },
           {
             "type": "Zigzag",
-            "amount": 30,
+            "amount": 50,
             "speed": 1,
             "radius": 5
           },
@@ -417,7 +417,7 @@
           },
           {
             "type": "Zigzag",
-            "amount": 35,
+            "amount": 60,
             "speed": 1,
             "radius": 5
           },

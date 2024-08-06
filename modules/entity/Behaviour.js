@@ -107,7 +107,7 @@ const zigzagMovement = (entity, area) => {
 };
 
 const chaserMovement = (entity, area) => {
-  const playerInPlayZone = area.players.find(player => isInPlayZone(player.position, area));
+  const playerInPlayZone = area.players.find(player => isInPlayZone(player.position, area) && player.deathTimer == -1);
   if (playerInPlayZone && isInPlayZone(entity.position, area)) {
     const dx = playerInPlayZone.position.x - entity.position.x;
     const dy = playerInPlayZone.position.y - entity.position.y;

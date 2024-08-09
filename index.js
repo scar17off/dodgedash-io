@@ -176,6 +176,10 @@ io.on("connection", socket => {
     }
   });
 
+  socket.on('chat', (message) => {
+    io.emit('chat', player.name, message, player.color);
+  });
+
   socket.on('disconnect', () => {
     const index = server.clients.indexOf(client);
     if (index !== -1) {

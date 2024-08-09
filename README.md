@@ -9,8 +9,6 @@ Welcome to DodgeDash.io, an exciting game where you navigate through various are
 # TODO
 - [ ] Levels and remaining experience indicator
 - [ ] Pellets
-- [ ] Leaderboard
-- [ ] Chat
 
 # License
 This project is licensed under the MIT license. See the [LICENSE](LICENSE.md) file for details.

@@ -4,6 +4,8 @@ import socket from './network';
 import Camera from './camera';
 import Renderer from './renderer';
 import HeroPanel from './HeroPanel';
+import Chat from './Chat.js';
+import Leaderboard from './Leaderboard';
 
 const Game = ({ nickname, hero }) => {
   const canvasRef = useRef(null);
@@ -30,6 +32,7 @@ const Game = ({ nickname, hero }) => {
     maxEnergy: 30,
     regen: 1
   });
+  const [messages, setMessages] = useState([]); // Add this state
 
   const updateGameState = useCallback((updater) => {
     setGameState(prevState => {
@@ -184,6 +187,10 @@ const Game = ({ nickname, hero }) => {
       }));
     });
 
+    socket.on('chat', (playerName, message, color) => {
+      setMessages(prevMessages => [...prevMessages, { playerName, message, color }]);
+    });
+
     const gameLoop = () => {
       const { mouse, keys, mouseMovement } = controlsRef.current;
       const currentInput = { keys, mouseMovement, mouse };
@@ -224,12 +231,19 @@ const Game = ({ nickname, hero }) => {
       socket.off('existingPlayers');
       socket.off('playerMove');
       socket.off('playerDisconnected');
+      socket.off('chat');
     };
   }, [nickname, hero, updateGameState]);
+
+  const sendMessage = useCallback((message) => {
+    socket.emit('chat', message);
+  }, []);
 
   return (
     <div style={{ position: 'relative' }}>
       <HeroPanel hero={heroStats} />
+      <Chat messages={messages} sendMessage={sendMessage} />
+      <Leaderboard gameState={gameState} />
       <canvas ref={canvasRef} style={{ display: 'block' }} />
     </div>
   );

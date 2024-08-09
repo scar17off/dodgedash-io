@@ -22,7 +22,7 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app" style={{ textAlign: 'center' }}>
       {gameState === 'game' ? (
         <Game nickname={nickname} hero={selectedHero} />
       ) : gameState === 'heroSelect' ? (

@@ -303,6 +303,7 @@ class Player {
       color: this.color,
       name: this.name,
       areaNumber: this.areaNumber,
+      regionName: this.regionName,
       deathTimer: this.deathTimer,
       energy: this.energy,
       maxEnergy: this.maxEnergy

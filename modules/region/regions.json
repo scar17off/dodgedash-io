@@ -10,7 +10,7 @@
         "deathTimer": 10,
         "entities": [
           {
-            "type": "Mine",
+            "type": "Normal",
             "amount": 15,
             "speed": 1.75,
             "radius": 10

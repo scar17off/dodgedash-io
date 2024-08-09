@@ -45,7 +45,7 @@ class Player {
      * The base speed of the player.
      * @type {number}
      */
-    this.baseSpeed = 15;
+    this.baseSpeed = 5;
 
     /**
      * The hero type ID of the player.

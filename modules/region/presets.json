@@ -1,0 +1,11 @@
+{
+  "default": {
+    "Alpha": {
+      "background": "black",
+      "size": {
+        "width": 3000,
+        "height": 480
+      }
+    }
+  }
+}

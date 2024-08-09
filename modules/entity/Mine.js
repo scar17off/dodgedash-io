@@ -11,6 +11,7 @@ class Mine extends Entity {
     this.reloadTime = 5000; // 5 seconds
     this.lastExplodeTime = 0;
     this.area = null;
+    this.respawnDelay = 2000; // 2 seconds delay before respawning
     this.update = (area) => {
       this.area = area;
       this.mineBehavior(area);
@@ -32,6 +33,7 @@ class Mine extends Entity {
       }
     } else if (currentTime - this.lastExplodeTime >= this.reloadTime) {
       this.exploded = false;
+      this.respawn();
     }
   }
 
@@ -49,8 +51,18 @@ class Mine extends Entity {
 
   explode(entity) {
     this.exploded = true;
+    this.color = "#FF0000";
     this.lastExplodeTime = Date.now();
-    entity.deathTimer = this.area.deathTimer;
+    entity.deathTimer = this.area.deathTimer * 1000;
+    setTimeout(() => this.respawn(), this.respawnDelay);
+  }
+
+  respawn() {
+    if (!this.area) return;
+    const newPosition = this.area.getRandomPosition(this.radius);
+    this.position = newPosition;
+    this.exploded = false;
+    this.color = "#FFD700";
   }
 
   getEntityData() {

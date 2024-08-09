@@ -1,5 +1,6 @@
 const entityTypes = require('../entity/Enemies');
 const Player = require('../player/Player');
+const presets = require('./presets.json');
 
 /**
  * Represents an area in the game.
@@ -30,8 +31,16 @@ class Area {
     this.regionName = regionName;
     this.areaNumber = areaNumber;
     this.position = { x: 0, y: 0 };
-    this.size = data.size;
-    this.background = data.background;
+    
+    if (data.preset && presets.default[data.preset]) {
+      const preset = presets.default[data.preset];
+      this.size = preset.size || data.size;
+      this.background = preset.background || data.background;
+    } else {
+      this.size = data.size;
+      this.background = data.background;
+    }
+    
     this.deathTimer = data.deathTimer;
     this.players = [];
     this.entities = [];

@@ -6,15 +6,11 @@
     },
     "areas": {
       "0": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
-            "type": "Normal",
+            "type": "Mine",
             "amount": 15,
             "speed": 1.75,
             "radius": 10
@@ -22,12 +18,8 @@
         ]
       },
       "1": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -44,12 +36,8 @@
         ]
       },
       "2": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -66,12 +54,8 @@
         ]
       },
       "3": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -94,12 +78,8 @@
         ]
       },
       "4": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -122,12 +102,8 @@
         ]
       },
       "5": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -150,12 +126,8 @@
         ]
       },
       "6": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -178,12 +150,8 @@
         ]
       },
       "7": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -206,12 +174,8 @@
         ]
       },
       "8": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -228,12 +192,8 @@
         ]
       },
       "9": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Normal",
@@ -262,12 +222,8 @@
         ]
       },
       "10": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -290,12 +246,8 @@
         ]
       },
       "11": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -318,12 +270,8 @@
         ]
       },
       "12": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -346,12 +294,8 @@
         ]
       },
       "13": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -374,12 +318,8 @@
         ]
       },
       "14": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -402,12 +342,8 @@
         ]
       },
       "15": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",
@@ -430,12 +366,8 @@
         ]
       },
       "16": {
-        "background": "black",
+        "preset": "Alpha",
         "deathTimer": 10,
-        "size": {
-          "width": 3000,
-          "height": 480
-        },
         "entities": [
           {
             "type": "Teleporter",

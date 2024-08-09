@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import socket from './network';
 
-const Leaderboard = ({ gameState }) => {
+const Leaderboard = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [players, setPlayers] = useState([]);
 
   useEffect(() => {
-    if (gameState.players) {
-      const sortedPlayers = [...gameState.players, gameState.localPlayer]
-        .sort((a, b) => b.score - a.score);
-      setPlayers(sortedPlayers);
-    }
-  }, [gameState]);
+    const handleLeaderboardUpdate = (leaderboardData) => {
+      setPlayers(leaderboardData);
+    };
+
+    socket.on('leaderboardUpdate', handleLeaderboardUpdate);
+
+    return () => {
+      socket.off('leaderboardUpdate', handleLeaderboardUpdate);
+    };
+  }, []);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);

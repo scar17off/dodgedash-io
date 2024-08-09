@@ -243,7 +243,7 @@ const Game = ({ nickname, hero }) => {
     <div style={{ position: 'relative' }}>
       <HeroPanel hero={heroStats} />
       <Chat messages={messages} sendMessage={sendMessage} />
-      <Leaderboard gameState={gameState} />
+      <Leaderboard />
       <canvas ref={canvasRef} style={{ display: 'block' }} />
     </div>
   );

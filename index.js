@@ -7,10 +7,9 @@ const path = require('path');
 const config = require("./config.json");
 
 const Region = require("./modules/region/Region");
-const Client = require("./modules/player/Client");
-const { heroType } = require("./modules/protocol.json");
-const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
+const { ioHandler, sendPlayerUpdates, sendLeaderboardUpdate } = require("./modules/ioHandler");
 const { log } = require("./modules/utils");
+const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
 
 log("INFO", "Starting server...");
 
@@ -23,6 +22,7 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"]
   }
 });
+ioHandler(io);
 
 /**
  * @global
@@ -37,9 +37,6 @@ global.server = {
   regions: {}
 };
 
-/**
- * @type {Object<string, Region>}
- */
 const regions = global.server.regions;
 
 function copyProtocolToReact() {
@@ -55,149 +52,9 @@ function copyProtocolToReact() {
 
 copyProtocolToReact();
 
-// Initialize regions
 for (const [regionName, regionData] of Object.entries(areasData)) {
   regions[regionName] = new Region(regionData, regionName);
 }
-
-function sendPlayerUpdates() {
-  for (const region of Object.values(regions)) {
-    for (const area of region.getLoadedAreas()) {
-      const playerUpdates = area.players.filter(player => player.socket.connected).map(player => player.getPlayerData());
-      io.to(`${region.regionName}-${area.areaNumber}`).emit('playersUpdate', playerUpdates);
-    }
-  }
-}
-
-io.on("connection", socket => {
-  /**
-   * Handles a new client connection.
-   * @param {Object} socket - The socket associated with the client.
-   * @param {Object} request - The request object associated with the socket.
-   * @returns {Object} The player associated with the client.
-   */
-  const client = new Client(socket, socket.request);
-  const player = client.player;
-  log("INFO", `Client ${client.player.id} connected`);
-  
-  socket.on('spawn', ({ nickname, hero }) => {
-    player.name = nickname;
-    player.heroType = heroType.find(h => h.name === hero)?.id || 0;
-    let currentArea = regions[player.regionName].getArea(player.areaNumber);
-    if (!currentArea) {
-      regions[player.regionName].loadArea(player.areaNumber);
-      currentArea = regions[player.regionName].getArea(player.areaNumber);
-    }
-    player.position = player.getRandomSpawnPosition(currentArea);
-    
-    const areaData = currentArea.getAreaData();
-    socket.emit('areaData', areaData);
-
-    socket.emit('selfId', player.id);
-
-    const playerData = player.getPlayerData();
-    socket.emit('playerUpdate', playerData);
-    socket.to(`${player.regionName}-${player.areaNumber}`).emit('newPlayer', playerData);
-
-    const existingPlayers = currentArea.players
-      .filter(p => p.id !== player.id)
-      .map(p => ({
-        id: p.id,
-        x: p.position.x,
-        y: p.position.y,
-        radius: p.radius,
-        speed: p.baseSpeed,
-        color: p.color,
-        name: p.name
-      }));
-    socket.emit('existingPlayers', existingPlayers);
-
-    if (!currentArea.players.includes(player)) {
-      currentArea.players.push(player);
-    }
-
-    socket.join(player.regionName + '-' + player.areaNumber);
-  });
-
-  socket.on('playerInput', (input) => {
-    let currentArea = regions[player.regionName].getArea(player.areaNumber);
-    if (!currentArea) {
-      regions[player.regionName].loadArea(player.areaNumber);
-      currentArea = regions[player.regionName].getArea(player.areaNumber);
-    }
-    player.handleInput(input, currentArea);
-  });
-
-  socket.on('abilityUse', (abilityNumber) => {
-    if(!player.abilities[abilityNumber]) {
-      log("ERROR", "No ability found with number " + abilityNumber);
-      return;
-    }
-    if(player.deathTimer !== -1) return;
-
-    const currentArea = regions[player.regionName].getArea(player.areaNumber);
-    player.abilities[abilityNumber].use(player, currentArea);
-  });
-
-  let lastUpgradeTime = 0;
-  const UPGRADE_COOLDOWN = 30;
-  socket.on('upgrade', (upgradeNumber) => {
-    const currentTime = Date.now();
-    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) return;
-
-    const stats = 3;
-    const abilities = player.abilities.length;
-    const updatedProperties = {};
-
-    // Upgrade stats
-    if (upgradeNumber === 0) { // Speed
-      if (player.baseSpeed < config.upgrades.maxSpeed) {
-        player.baseSpeed += 0.5;
-        updatedProperties.speed = player.baseSpeed;
-      }
-    } else if (upgradeNumber === 1) { // Max Energy
-      if (player.maxEnergy < config.upgrades.maxEnergy) {
-        player.maxEnergy += 5;
-        updatedProperties.maxEnergy = player.maxEnergy;
-      }
-    } else if (upgradeNumber === 2) { // Regen
-      if (player.energyRegen < config.upgrades.maxEnergyRegen) {
-        player.energyRegen += 0.5;
-        updatedProperties.energyRegen = player.energyRegen;
-      }
-    } else if (player.abilities[upgradeNumber - stats - 1]) { // Upgrade an ability
-      player.abilities[upgradeNumber - abilities - 1].upgrade();
-      updatedProperties.abilities = player.abilities.map(ability => ability.getData());
-    }
-
-    if (Object.keys(updatedProperties).length > 0) {
-      socket.emit('heroUpdate', updatedProperties);
-      lastUpgradeTime = currentTime; // Update the last upgrade time
-    }
-  });
-
-  socket.on('chat', (message) => {
-    io.emit('chat', player.name, message, player.color);
-  });
-
-  socket.on('disconnect', () => {
-    const index = server.clients.indexOf(client);
-    if (index !== -1) {
-      server.clients.splice(index, 1);
-      log("INFO", `Client ${client.player.id} disconnected`);
-      
-      let currentArea = regions[player.regionName]?.getArea(player.areaNumber);
-      if (currentArea) {
-        const playerIndex = currentArea.players.indexOf(player);
-        if (playerIndex !== -1) {
-          currentArea.players.splice(playerIndex, 1);
-        }
-        
-        io.emit('playerDisconnected', player.id);
-      }
-    }
-  });
-});
 
 function changePlayerArea(player, direction) {
   const currentRegion = regions[player.regionName];
@@ -290,13 +147,14 @@ function changePlayerArea(player, direction) {
         }
       }
     });
+
+    sendLeaderboardUpdate(io);
   }
 }
 
 const gameLoop = () => {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
-      // Update players
       for (const player of area.players) {
         player.update(area);
 
@@ -358,8 +216,7 @@ const gameLoop = () => {
     }
   }
 
-  // Send all player updates at once
-  sendPlayerUpdates();
+  sendPlayerUpdates(io);
 
   // Send entity updates
   for (const region of Object.values(regions)) {

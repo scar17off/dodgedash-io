@@ -306,8 +306,9 @@ class Player {
       regionName: this.regionName,
       deathTimer: this.deathTimer,
       energy: this.energy,
-      maxEnergy: this.maxEnergy
-    };
+      maxEnergy: this.maxEnergy,
+      energyRegen: this.energyRegen
+    }
   }
 }
 

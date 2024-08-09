@@ -5,23 +5,29 @@ import React from "react";
 import IceWall from "../svg/IceWall.svg";
 import ColdImmunity from "../svg/ColdImmunity.svg";
 
-const HeroPanel = ({ hero }) => {
-  const heroData = protocol.heroType.find(h => h.name === hero.name);
-
+const HeroPanel = ({ localPlayer }) => {
+  if (!localPlayer) {
+    return <div className="hero-info-panel">Loading...</div>;
+  }
+  const heroData = protocol.heroType.find(h => h.name === localPlayer.heroType);
+  if (!heroData) {
+    console.error(`Hero type ${localPlayer.heroType} not found in protocol`);
+    return <div className="hero-info-panel">Error: Hero data not found</div>;
+  }
   return (
     <div className="hero-info-panel">
       <div className="info-panel">
         <h2>{heroData.name}</h2>
         <div className="hero-avatar">
-          <span className="hero-level">{hero.level}</span>
+          <span className="hero-level">{localPlayer.level}</span>
         </div>
-        <p>{hero.nickname}</p>
+        <p>{localPlayer.name}</p>
       </div>
       <div className="upgrades">
-        <Upgrade name="Speed" value={hero.speed} />
-        <Upgrade name="Energy" value={`${hero.energy}/${hero.maxEnergy}`} />
-        <Upgrade name="Regen" value={hero.regen} />
-        {heroData.abilities.map((ability, index) => (
+        <Upgrade name="Speed" value={localPlayer.speed} />
+        <Upgrade name="Energy" value={`${Math.round(localPlayer.energy)}/${localPlayer.maxEnergy}`} />
+        <Upgrade name="Regen" value={localPlayer.energyRegen} />
+        {heroData.abilities && heroData.abilities.map((ability, index) => (
           <Upgrade key={index} name={ability.name} id={index} isAbility />
         ))}
       </div>

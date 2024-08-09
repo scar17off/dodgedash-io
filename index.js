@@ -7,8 +7,9 @@ const path = require('path');
 const config = require("./config.json");
 
 const Region = require("./modules/region/Region");
-const { ioHandler, sendPlayerUpdates, sendLeaderboardUpdate } = require("./modules/ioHandler");
+const Client = require("./modules/player/Client");
 const { log } = require("./modules/utils");
+const { heroType } = require("./modules/protocol.json");
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
 
 log("INFO", "Starting server...");
@@ -22,7 +23,6 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST"]
   }
 });
-ioHandler(io);
 
 /**
  * @global
@@ -150,6 +150,148 @@ function changePlayerArea(player, direction) {
 
     sendLeaderboardUpdate(io);
   }
+}
+
+function sendPlayerUpdates(io) {
+  for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      const playerUpdates = area.players.filter(player => player.socket.connected).map(player => player.getPlayerData());
+      io.to(`${region.regionName}-${area.areaNumber}`).emit('playersUpdate', playerUpdates);
+    }
+  }
+}
+
+function sendLeaderboardUpdate(io) {
+  const leaderboardData = [];
+  for (const region of Object.values(regions)) {
+    for (const area of region.getLoadedAreas()) {
+      for (const player of area.players) {
+        leaderboardData.push({
+          id: player.id,
+          name: player.name,
+          regionName: region.regionName,
+          areaNumber: area.areaNumber,
+          color: player.color,
+          score: player.score
+        });
+      }
+    }
+  }
+
+  leaderboardData.sort((a, b) => b.areaNumber - a.areaNumber || b.score - a.score);
+
+  io.emit('leaderboardUpdate', leaderboardData);
+}
+
+io.on("connection", socket => {
+  const client = new Client(socket, socket.request);
+  const player = client.player;
+  log("INFO", `Client ${player.id} connected`);
+
+  socket.on('spawn', ({ nickname, hero }) => {
+    player.name = nickname;
+    player.heroType = heroType.find(h => h.name === hero)?.id || 0;
+    let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    player.position = player.getRandomSpawnPosition(currentArea);
+
+    socket.emit('areaData', currentArea.getAreaData());
+    socket.emit('selfId', player.id);
+    socket.emit('playerUpdate', player.getPlayerData());
+    socket.to(`${player.regionName}-${player.areaNumber}`).emit('newPlayer', player.getPlayerData());
+
+    const existingPlayers = currentArea.players
+      .filter(p => p.id !== player.id)
+      .map(p => ({
+        id: p.id,
+        x: p.position.x,
+        y: p.position.y,
+        radius: p.radius,
+        speed: p.baseSpeed,
+        color: p.color,
+        name: p.name
+      }));
+    socket.emit('existingPlayers', existingPlayers);
+
+    if (!currentArea.players.includes(player)) {
+      currentArea.players.push(player);
+    }
+    socket.join(player.regionName + '-' + player.areaNumber);
+    sendLeaderboardUpdate(io);
+  });
+
+  socket.on('playerInput', input => {
+    let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    player.handleInput(input, currentArea);
+  });
+
+  socket.on('abilityUse', abilityNumber => {
+    if (!player.abilities[abilityNumber] || player.deathTimer !== -1) return;
+    const currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    player.abilities[abilityNumber].use(player, currentArea);
+  });
+
+  const UPGRADE_COOLDOWN = 30;
+  let lastUpgradeTime = 0;
+
+  socket.on('upgrade', upgradeNumber => {
+    const currentTime = Date.now();
+    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) return;
+
+    const updatedProperties = {};
+    const stats = 3;
+    const abilities = player.abilities.length;
+
+    if (upgradeNumber === 0 && player.baseSpeed < config.upgrades.maxSpeed) {
+      player.baseSpeed += 0.5;
+      updatedProperties.speed = player.baseSpeed;
+    } else if (upgradeNumber === 1 && player.maxEnergy < config.upgrades.maxEnergy) {
+      player.maxEnergy += 5;
+      updatedProperties.maxEnergy = player.maxEnergy;
+    } else if (upgradeNumber === 2 && player.energyRegen < config.upgrades.maxEnergyRegen) {
+      player.energyRegen += 0.5;
+      updatedProperties.energyRegen = player.energyRegen;
+    } else if (player.abilities[upgradeNumber - stats - 1]) {
+      player.abilities[upgradeNumber - abilities - 1].upgrade();
+      updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+    }
+
+    if (Object.keys(updatedProperties).length > 0) {
+      socket.emit('heroUpdate', updatedProperties);
+      lastUpgradeTime = currentTime;
+    }
+  });
+
+  socket.on('chat', message => {
+    io.emit('chat', player.name, message, player.color);
+  });
+
+  socket.on('disconnect', () => {
+    const client = server.clients.find(c => c.player.id === player.id);
+    if (client) {
+      const index = server.clients.indexOf(client);
+      server.clients.splice(index, 1);
+      log("INFO", `Client ${player.id} disconnected`);
+
+      let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+      if (currentArea) {
+        const playerIndex = currentArea.players.indexOf(player);
+        if (playerIndex !== -1) {
+          currentArea.players.splice(playerIndex, 1);
+        }
+        io.emit('playerDisconnected', player.id);
+      }
+      sendLeaderboardUpdate(io);
+    }
+  });
+});
+
+function getOrLoadArea(regionName, areaNumber) {
+  let area = server.regions[regionName].getArea(areaNumber);
+  if (!area) {
+    server.regions[regionName].loadArea(areaNumber);
+    area = server.regions[regionName].getArea(areaNumber);
+  }
+  return area;
 }
 
 const gameLoop = () => {

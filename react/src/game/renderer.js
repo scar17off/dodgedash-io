@@ -7,7 +7,6 @@ class Renderer {
 
   renderArea(area) {
     if (!area) {
-      console.warn('Area data is null or undefined');
       return;
     }
     if (!area.position || !area.size) {
@@ -178,8 +177,6 @@ class Renderer {
     // Render area
     if (gameState && gameState.area) {
       this.renderArea(gameState.area);
-    } else {
-      console.warn('No area data in game state:', JSON.stringify(gameState, null, 2));
     }
 
     // Render abilities

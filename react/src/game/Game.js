@@ -14,7 +14,18 @@ const Game = ({ nickname, hero }) => {
   const rendererRef = useRef(null);
   const lastSentInputRef = useRef(null);
   const initialState = {
-    localPlayer: { position: { x: 0, y: 0 }, speed: 0, radius: 0, name: nickname, areaNumber: 0 },
+    localPlayer: {
+      heroType: hero,
+      position: { x: 0, y: 0 },
+      speed: 0,
+      radius: 0,
+      energy: 0,
+      maxEnergy: 0,
+      energyRegen: 0,
+      name: nickname,
+      regionName: 'Unknown',
+      areaNumber: 0
+    },
     players: [],
     entities: [],
     abilityCreations: [],
@@ -23,24 +34,15 @@ const Game = ({ nickname, hero }) => {
   };
   const gameStateRef = useRef(initialState);
   const [gameState, setGameState] = useState(initialState);
-  const [heroStats, setHeroStats] = useState({
-    name: hero,
-    nickname: gameState.localPlayer.name,
-    level: 1,
-    speed: 5,
-    energy: 30,
-    maxEnergy: 30,
-    regen: 1
-  });
   const [messages, setMessages] = useState([]); // Add this state
 
   const updateGameState = useCallback((updater) => {
     setGameState(prevState => {
       const newState = updater(prevState);
       gameStateRef.current = newState;
+      window.gameState = gameStateRef.current;
       return newState;
-    });
-    window.gameState = gameState;
+    }); 
   }, []);
 
   useEffect(() => {
@@ -94,7 +96,13 @@ const Game = ({ nickname, hero }) => {
         return {
           ...prevState,
           localPlayer: localPlayer ? { ...prevState.localPlayer, ...localPlayer } : prevState.localPlayer,
-          players: otherPlayers
+          players: otherPlayers.map(player => ({
+            ...player,
+            position: {
+              x: player.position.x,
+              y: player.position.y
+            }
+          }))
         };
       });
     });
@@ -111,25 +119,12 @@ const Game = ({ nickname, hero }) => {
       updateGameState(prevState => ({ ...prevState, abilityCreations }));
     });
 
-    socket.on('heroUpdate', (updatedHeroStats) => {
-      setHeroStats(prevStats => ({
-        ...prevStats,
-        ...updatedHeroStats,
-        speed: updatedHeroStats.speed !== undefined 
-          ? Number(updatedHeroStats.speed) 
-          : prevStats.speed,
-        regen: updatedHeroStats.energyRegen !== undefined 
-          ? Number(updatedHeroStats.energyRegen) 
-          : prevStats.regen
-      }));
-    });
-
     socket.on('areaChanged', ({ areaData, playerUpdate }) => {
       updateGameState(prevState => ({
         ...prevState,
         area: areaData,
         localPlayer: { ...prevState.localPlayer, ...playerUpdate },
-        players: [] // Clear other players when changing areas
+        players: []
       }));
     });
 
@@ -206,10 +201,6 @@ const Game = ({ nickname, hero }) => {
         cameraRef.current.update(currentGameState.localPlayer.position.x, currentGameState.localPlayer.position.y);
       }
       
-      if (!currentGameState.area) {
-        console.warn('Area data is missing in the game state');
-      }
-      
       rendererRef.current.render(currentGameState);
 
       requestAnimationFrame(gameLoop);
@@ -223,10 +214,10 @@ const Game = ({ nickname, hero }) => {
       socket.off('areaData');
       socket.off('playerUpdate');
       socket.off('entityUpdate');
-      socket.off('heroUpdate');
       socket.off('areaChanged');
       socket.off('playerLeft');
       socket.off('playerJoined');
+      socket.off('selfId');
       socket.off('newPlayer');
       socket.off('existingPlayers');
       socket.off('playerMove');
@@ -241,7 +232,7 @@ const Game = ({ nickname, hero }) => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <HeroPanel hero={heroStats} />
+      <HeroPanel localPlayer={gameState.localPlayer} />
       <Chat messages={messages} sendMessage={sendMessage} />
       <Leaderboard />
       <canvas ref={canvasRef} style={{ display: 'block' }} />

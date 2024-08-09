@@ -45,7 +45,7 @@ class Player {
      * The base speed of the player.
      * @type {number}
      */
-    this.baseSpeed = 5;
+    this.baseSpeed = 15;
 
     /**
      * The hero type ID of the player.
@@ -125,9 +125,20 @@ class Player {
     ];
   }
 
+  resetInputState() {
+    this.input = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+    this.velocity = { x: 0, y: 0 };
+  }
+
   respawn() {
     this.deathTimer = -1;
-    this.position = this.getRandomSpawnPosition(this.area);
+    const area = server.getArea(server.regions[this.regionName], this.areaNumber);
+    this.position = this.getRandomSpawnPosition(area);
   }
 
   collideCheck(player) {

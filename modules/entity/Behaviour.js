@@ -71,12 +71,17 @@ const bounceMovement = (entity, area) => {
   if (entity.velocity.x === 0 && entity.velocity.y === 0) {
     const angle = Math.random() * 2 * Math.PI;
     entity.velocity = {
-      x: Math.cos(angle) * entity.speed,
-      y: Math.sin(angle) * entity.speed
+      x: Math.cos(angle),
+      y: Math.sin(angle)
     };
   }
-  let newX = entity.position.x + entity.velocity.x;
-  let newY = entity.position.y + entity.velocity.y;
+  const velocityMagnitude = Math.sqrt(entity.velocity.x ** 2 + entity.velocity.y ** 2);
+  const normalizedVelocity = {
+    x: entity.velocity.x / velocityMagnitude,
+    y: entity.velocity.y / velocityMagnitude
+  };
+  let newX = entity.position.x + normalizedVelocity.x * entity.speed;
+  let newY = entity.position.y + normalizedVelocity.y * entity.speed;
 
   ({ newX, newY } = checkCollisions(entity, area, newX, newY));
 

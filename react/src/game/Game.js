@@ -212,7 +212,6 @@ const Game = ({ nickname, hero }) => {
       window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('wheel', handleWheel);
       socket.off('areaData');
-      socket.off('playerUpdate');
       socket.off('entityUpdate');
       socket.off('areaChanged');
       socket.off('playerLeft');

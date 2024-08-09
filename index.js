@@ -34,8 +34,16 @@ const io = new Server(httpServer, {
 global.server = {
   lastId: 1,
   clients: [],
-  regions: {}
-};
+  regions: {},
+  getArea(region, areaNumber) {
+    let area = region.getArea(areaNumber);
+    if (!area) {
+      region.loadArea(areaNumber);
+      area = region.getArea(areaNumber);
+    }
+    return area;
+  }
+}
 
 const regions = global.server.regions;
 
@@ -68,11 +76,7 @@ function changePlayerArea(player, direction) {
   }
 
   if (newAreaNumber !== oldAreaNumber) {
-    let currentArea = currentRegion.getArea(oldAreaNumber);
-    if (!currentArea) {
-      currentRegion.loadArea(oldAreaNumber);
-      currentArea = currentRegion.getArea(oldAreaNumber);
-    }
+    const currentArea = server.getArea(currentRegion, oldAreaNumber);
 
     const playerIndex = currentArea.players.indexOf(player);
     if (playerIndex !== -1) {
@@ -85,11 +89,7 @@ function changePlayerArea(player, direction) {
     }
 
     player.areaNumber = newAreaNumber;
-    let newArea = currentRegion.getArea(newAreaNumber);
-    if (!newArea) {
-      currentRegion.loadArea(newAreaNumber);
-      newArea = currentRegion.getArea(newAreaNumber);
-    }
+    let newArea = server.getArea(currentRegion, newAreaNumber);
 
     if (!newArea.players.includes(player)) {
       newArea.players.push(player);
@@ -148,11 +148,11 @@ function changePlayerArea(player, direction) {
       }
     });
 
-    sendLeaderboardUpdate(io);
+    sendLeaderboardUpdate();
   }
 }
 
-function sendPlayerUpdates(io) {
+function sendPlayerUpdates() {
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
       const playerUpdates = area.players.filter(player => player.socket.connected).map(player => player.getPlayerData());
@@ -161,7 +161,7 @@ function sendPlayerUpdates(io) {
   }
 }
 
-function sendLeaderboardUpdate(io) {
+function sendLeaderboardUpdate() {
   const leaderboardData = [];
   for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
@@ -171,14 +171,13 @@ function sendLeaderboardUpdate(io) {
           name: player.name,
           regionName: region.regionName,
           areaNumber: area.areaNumber,
-          color: player.color,
-          score: player.score
+          color: player.color
         });
       }
     }
   }
 
-  leaderboardData.sort((a, b) => b.areaNumber - a.areaNumber || b.score - a.score);
+  leaderboardData.sort((a, b) => b.areaNumber - a.areaNumber);
 
   io.emit('leaderboardUpdate', leaderboardData);
 }
@@ -191,7 +190,7 @@ io.on("connection", socket => {
   socket.on('spawn', ({ nickname, hero }) => {
     player.name = nickname;
     player.heroType = heroType.find(h => h.name === hero)?.id || 0;
-    let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    let currentArea = getArea(player.regionName, player.areaNumber);
     player.position = player.getRandomSpawnPosition(currentArea);
 
     socket.emit('areaData', currentArea.getAreaData());
@@ -206,7 +205,6 @@ io.on("connection", socket => {
         x: p.position.x,
         y: p.position.y,
         radius: p.radius,
-        speed: p.baseSpeed,
         color: p.color,
         name: p.name
       }));
@@ -216,17 +214,17 @@ io.on("connection", socket => {
       currentArea.players.push(player);
     }
     socket.join(player.regionName + '-' + player.areaNumber);
-    sendLeaderboardUpdate(io);
+    sendLeaderboardUpdate();
   });
 
   socket.on('playerInput', input => {
-    let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    let currentArea = getArea(player.regionName, player.areaNumber);
     player.handleInput(input, currentArea);
   });
 
   socket.on('abilityUse', abilityNumber => {
     if (!player.abilities[abilityNumber] || player.deathTimer !== -1) return;
-    const currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+    const currentArea = getArea(player.regionName, player.areaNumber);
     player.abilities[abilityNumber].use(player, currentArea);
   });
 
@@ -272,7 +270,7 @@ io.on("connection", socket => {
       server.clients.splice(index, 1);
       log("INFO", `Client ${player.id} disconnected`);
 
-      let currentArea = getOrLoadArea(player.regionName, player.areaNumber);
+      let currentArea = getArea(player.regionName, player.areaNumber);
       if (currentArea) {
         const playerIndex = currentArea.players.indexOf(player);
         if (playerIndex !== -1) {
@@ -280,12 +278,12 @@ io.on("connection", socket => {
         }
         io.emit('playerDisconnected', player.id);
       }
-      sendLeaderboardUpdate(io);
+      sendLeaderboardUpdate();
     }
   });
 });
 
-function getOrLoadArea(regionName, areaNumber) {
+function getArea(regionName, areaNumber) {
   let area = server.regions[regionName].getArea(areaNumber);
   if (!area) {
     server.regions[regionName].loadArea(areaNumber);
@@ -320,10 +318,44 @@ const gameLoop = () => {
 
         // Timer update and respawn
         if (player.deathTimer !== -1) {
-          player.deathTimer = Math.max(0, player.deathTimer - 1000 / 45);
+          player.deathTimer = Math.max(0, player.deathTimer - 1000 / (Math.round(config.fps / 1.33)));
           if (player.deathTimer <= 0) {
-            player.deathTimer = -1;
-            player.position = player.getRandomSpawnPosition(area);
+            const oldAreaNumber = player.areaNumber;
+            player.areaNumber = 0;
+            player.respawn();
+            const client = server.clients.find(c => c.player.id === player.id);
+            const socket = client.ws;
+            const respawnArea = server.getArea(server.regions[player.regionName], player.areaNumber);
+            
+            // Remove player from old area
+            const oldArea = server.getArea(server.regions[player.regionName], oldAreaNumber);
+            const playerIndex = oldArea.players.indexOf(player);
+            if (playerIndex !== -1) {
+              oldArea.players.splice(playerIndex, 1);
+            }
+            
+            // Add player to new area
+            if (!respawnArea.players.includes(player)) {
+              respawnArea.players.push(player);
+            }
+            
+            // Update client with new player data
+            socket.emit('playerUpdate', player.getPlayerData());
+            socket.emit('areaData', respawnArea.getAreaData());
+            socket.emit('areaChanged', {
+              areaData: respawnArea.getAreaData(),
+              playerUpdate: player.getPlayerData()
+            });
+            
+            // Update room subscriptions
+            socket.leave(`${player.regionName}-${oldAreaNumber}`);
+            socket.join(`${player.regionName}-${player.areaNumber}`);
+            
+            // Notify other players about the respawned player
+            socket.to(`${player.regionName}-${player.areaNumber}`).emit('playerJoined', player.getPlayerData());
+          
+            // Update the leaderboard
+            sendLeaderboardUpdate();
           }
         }
 
@@ -358,7 +390,7 @@ const gameLoop = () => {
     }
   }
 
-  sendPlayerUpdates(io);
+  sendPlayerUpdates();
 
   // Send entity updates
   for (const region of Object.values(regions)) {
@@ -372,7 +404,9 @@ const gameLoop = () => {
    for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
       const abilityCreationData = area.abilityCreations.map(entity => entity.getCreationData());
-      io.to(`${region.regionName}-${area.areaNumber}`).emit('abilityCreationUpdate', abilityCreationData);
+      if(abilityCreationData.length > 0) {
+        io.to(`${region.regionName}-${area.areaNumber}`).emit('abilityCreationUpdate', abilityCreationData);
+      }
     }
   }
 

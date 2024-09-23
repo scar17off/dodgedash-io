@@ -160,9 +160,18 @@ class Renderer {
   }
 
   renderAbilityCreations(ability) {
-    if(ability.creationType == "Ice Wall") {
+    if (ability.creationType == "Ice Wall") {
       this.context.fillStyle = ability.color;
       this.context.fillRect(ability.position.x, ability.position.y, ability.size.width, ability.size.height);
+    } else if (ability.creationType == "Magnetic Field" && ability.isActive) {
+      this.context.beginPath();
+      this.context.arc(ability.position.x, ability.position.y, ability.radius, 0, 2 * Math.PI);
+      this.context.fillStyle = ability.color;
+      this.context.fill();
+      // Add a subtle border to make the field more visible
+      this.context.strokeStyle = 'rgba(255, 0, 255, 0.5)';
+      this.context.lineWidth = 2;
+      this.context.stroke();
     }
   }
 

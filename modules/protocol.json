@@ -35,6 +35,35 @@
           ]
         }
       ]
+    },
+    {
+      "id": 1,
+      "name": "Magno",
+      "color": "#ff7ebd",
+      "abilities": [
+        {
+          "name": "Magnetize",
+          "description": "Magno creates a magnetic field around the player, attracting nearby projectiles and enemies. This ability can be used both defensively to protect allies and offensively to group enemies together.",
+          "upgrades": [
+            {
+              "name": "Cooldown",
+              "upgradePath": [10, 8, 6, 4, 2],
+              "base": 10
+            },
+            {
+              "name": "Field Radius",
+              "upgradePath": [80, 90, 100, 110, 120],
+              "base": 80
+            },
+            {
+              "name": "Field Duration",
+              "upgradePath": [4, 4.5, 5, 5.5, 6],
+              "base": 4
+            }
+          ],
+          "energyCost": 15
+        } 
+      ]
     }
   ]
 }

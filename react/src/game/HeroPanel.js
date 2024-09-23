@@ -4,6 +4,7 @@ import React from "react";
 
 import IceWall from "../svg/IceWall.svg";
 import ColdImmunity from "../svg/ColdImmunity.svg";
+import Magnetize from "../svg/Magnetize.svg";
 
 const HeroPanel = ({ localPlayer }) => {
   if (!localPlayer) {
@@ -52,7 +53,8 @@ const UpgradeBar = ({ curr, min, max, step }) => {
 const Upgrade = ({ name, value, isAbility = false }) => {
   const svgMap = {
     IceWall,
-    ColdImmunity
+    ColdImmunity,
+    Magnetize
   };
 
   return (

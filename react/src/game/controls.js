@@ -1,9 +1,5 @@
 import socket from './network';
 
-/*
-  THE UPGRADE CODE IS SO SHIT THAT IT SENDS TWO UPGRADE EVENTS AT ONCE. TODO: FIX IT!!!!!
-*/
-
 export function setupControls(canvas) {
   const controls = {
     mouse: { x: 0, y: 0 },
@@ -39,7 +35,7 @@ export function setupControls(canvas) {
     const key = keyMap[e.code];
     const upgradeIndex = upgradeKeyMap[e.code];
 
-    if (key && controls.keys[key] !== true) {
+    if (key && !controls.keys[key]) {
       controls.keys[key] = true;
       socket.emit('keyPress', { key, pressed: true });
       
@@ -59,7 +55,7 @@ export function setupControls(canvas) {
     const key = keyMap[e.code];
     const upgradeIndex = upgradeKeyMap[e.code];
 
-    if (key && controls.keys[key] !== false) {
+    if (key && controls.keys[key]) {
       controls.keys[key] = false;
       socket.emit('keyPress', { key, pressed: false });
     }

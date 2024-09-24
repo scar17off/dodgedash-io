@@ -56,7 +56,16 @@ function log(prefix, ...args) {
   const now = new Date();
   const date = now.toLocaleDateString('en-GB').replace(/\//g, '.');
   const time = now.toTimeString().split(' ')[0].slice(0, 5);
-  console.log(chalk.blueBright(`[${date}] [${time}] [${prefix}]`), chalk.white(...args));
+  
+  const prefixColors = {
+    INFO: chalk.blueBright,
+    WARN: chalk.yellowBright,
+    ERROR: chalk.redBright,
+    DEBUG: chalk.greenBright
+  };
+
+  const prefixColor = prefixColors[prefix] || chalk.whiteBright;
+  console.log(prefixColor(`[${date}] [${time}] [${prefix}]`), chalk.white(...args));
 }
 
 module.exports = { isWithinBorder, isWithinBorderOrStartZone, log };

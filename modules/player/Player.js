@@ -1,4 +1,4 @@
-const { isWithinBorderOrStartZone } = require("../utils");
+const { isWithinBorderOrStartZone, log } = require("../utils");
 const { heroType } = require("../protocol.json");
 
 const abilityTypes = require("../ability/Abilities");
@@ -164,7 +164,16 @@ class Player {
     if (hero) {
       this._heroType = newHeroTypeId;
       this.color = hero.color;
-      this.abilities = hero.abilities.map(ability => new abilityTypes[ability.name.replace(/\s+/g, '')]());
+      // Setting the abilities to the new hero's abilities
+      this.abilities = hero.abilities.map(ability => {
+        const abilityClass = abilityTypes[ability.name.replace(/\s+/g, '')];
+        if (abilityClass) {
+          return new abilityClass();
+        } else {
+          log("WARN", `Ability ${ability.name} not found in abilityTypes. Skipping.`);
+          return null;
+        }
+      }).filter(ability => ability !== null);
     } else {
       console.error(`Hero type with id ${newHeroTypeId} not found`);
     }

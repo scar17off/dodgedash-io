@@ -38,6 +38,100 @@
     },
     {
       "id": 1,
+      "name": "Gojo",
+      "color": "#4169E1",
+      "abilities": [
+        {
+          "name": "Elemental Manipulation",
+          "description": "Gojo's ability evolves with upgrades: from small red repelling bullets to blue attracting orbs, then to powerful red and blue projectiles with devastating effects, culminating in a destructive purple sphere. Each upgrade offers unique offensive and defensive capabilities.",
+          "upgrades": [
+            {
+              "name": "Elemental Mastery",
+              "description": "Gojo's ability evolves with upgrades: from small red repelling bullets to blue attracting orbs, then to powerful red and blue projectiles with devastating effects, culminating in a destructive purple sphere. Each upgrade offers unique offensive and defensive capabilities.",
+              "upgradePath": [20, 40, 60, 80, 100],
+              "base": 20
+            }
+          ],
+          "energyCost": 15
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Sun Celestial",
+      "color": "#FFD700",
+      "description": "A powerful female hero, important to the lore and medium-hard to obtain.",
+      "abilities": [
+        {
+          "name": "Sun Rays",
+          "description": "Sun Celestial emits intense heat, burning nearby enemies alive. Enemies close to the hero are slowed by 55%, while those further away are slowed by 25%.",
+          "upgrades": [
+            {
+              "name": "Range",
+              "upgradePath": [100, 200, 300, 400, 500],
+              "base": 100
+            }
+          ],
+          "energyCost": 10
+        },
+        {
+          "name": "The Core of the Sun",
+          "description": "When Sun Celestial touches an enemy, it burns them and becomes temporarily passable for 5 seconds. A small fire trail is left behind, slowing enemies by 90% when they touch it.",
+          "upgrades": [
+            {
+              "name": "Cooldown",
+              "upgradePath": [20, 17, 15, 12, 1],
+              "base": 20
+            }
+          ],
+          "energyCost": 10
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Scout",
+      "color": "#32CD32",
+      "description": "A starter hero with agile abilities, perfect for quick maneuvers and stealth tactics.",
+      "abilities": [
+        {
+          "name": "Flash Dash",
+          "description": "The Scout dashes forward a short distance, evading enemies and obstacles.",
+          "upgrades": [
+            {
+              "name": "Cooldown",
+              "upgradePath": [5.0, 4.5, 4.0, 3.5, 3.0],
+              "base": 5.0
+            },
+            {
+              "name": "Dash Distance",
+              "upgradePath": [5, 6, 7, 8, 9],
+              "base": 5
+            }
+          ],
+          "energyCost": 10
+        },
+        {
+          "name": "Stealth Cloak",
+          "description": "Temporarily makes the Scout invisible, allowing them to pass through enemies without being detected.",
+          "upgrades": [
+            {
+              "name": "Cooldown",
+              "upgradePath": [8.0, 7.5, 7.0, 6.5, 6.0],
+              "base": 8.0
+            },
+            {
+              "name": "Duration",
+              "upgradePath": [3.0, 3.5, 4.0, 4.5, 5.0],
+              "base": 3.0
+            }
+          ],
+          "energyCost": 15
+        }
+      ]
+    },
+    {
+      "id": 1,
       "name": "Magno",
       "color": "#ff7ebd",
       "abilities": [

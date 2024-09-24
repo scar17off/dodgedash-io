@@ -7,9 +7,12 @@ class Wall extends AbilityCreation {
     this.creationType = "Ice Wall";
     this.position = { x: 0, y: 0 };
     this.size = { width: 0, height: 0 };
-    this.color = "#3dcfd1";
-    this.creationTIme = Date.now();
+    this.activeColor = "#3dcfd1";
+    this.inactiveColor = "rgba(61, 207, 209, 0)"; // Fully transparent version of activeColor
+    this.color = this.activeColor;
+    this.creationTime = Date.now();
     this.destroyCooldown = 3;
+    this.isActive = true;
 
     // Determine wall size and position based on player's direction
     const angle = Math.atan2(player.input.mouse.y, player.input.mouse.x);
@@ -44,15 +47,21 @@ class Wall extends AbilityCreation {
   }
 
   update(area) {
-    if (Date.now() - this.creationTIme >= this.destroyCooldown * 1000) {
-      const index = area.abilityCreations.indexOf(this);
-      if (index !== -1) {
-        area.abilityCreations.splice(index, 1);
+    if (Date.now() - this.creationTime >= this.destroyCooldown * 1000) {
+      if (this.isActive) {
+        this.isActive = false;
+        this.color = this.inactiveColor;
+      } else {
+        const index = area.abilityCreations.indexOf(this);
+        if (index !== -1) {
+          area.abilityCreations.splice(index, 1);
+        }
       }
     }
   }
 
   collideCheck(entity, newX, newY) {
+    if (!this.isActive) return null;
     const wallLeft = this.position.x;
     const wallRight = this.position.x + this.size.width;
     const wallTop = this.position.y;

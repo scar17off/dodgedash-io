@@ -32,6 +32,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
+  margin-bottom: 5px;
 }
 
 .hero-avatar::before {
@@ -147,4 +148,15 @@
   cursor: pointer;
   background: transparent;
   border-radius: 0;
+}
+
+.info-panel h2 {
+  margin: 0;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.info-panel p {
+  margin: 0;
+  font-size: 14px;
 }

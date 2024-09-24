@@ -37,6 +37,12 @@ class Ability {
      * @type {number}
      */
     this.lastUse = 0;
+
+    /**
+     * Whether the ability is unlocked.
+     * @type {boolean}
+     */
+    this.unlocked = false;
   }
 
   /**
@@ -55,14 +61,17 @@ class Ability {
    * Upgrades the ability.
    */
   upgrade() {
+    if (!this.unlocked) {
+      this.unlocked = true;
+      this.upgradeLevel = 1;
+      return;
+    }
     for (const key in this.upgradePath) {
-      if (this.upgradeLevel < this.upgradePath[key].length - 1) {
+      if (this.upgradeLevel < this.upgradePath[key].length) {
         this.upgradeLevel++;
-        console.log(`${this.name} upgraded to level ${this.upgradeLevel}`);
         return;
       }
     }
-    console.log(`${this.name} is already at max level`);
   }
 
   /**
@@ -71,11 +80,23 @@ class Ability {
    * @returns {number|null} The upgrade level or null if the upgrade path is not found.
    */
   getUpgradeLevel(upgradeName) {
-    if (this.upgradePath[upgradeName]) {
-      return this.upgradePath[upgradeName][this.upgradeLevel];
+    if (this.upgradePath[upgradeName] && this.upgradeLevel > 0) {
+      return this.upgradePath[upgradeName][this.upgradeLevel - 1];
     }
-    console.error(`Upgrade path for ${upgradeName} not found`);
-    return null;
+    return this.upgradePath[upgradeName] ? this.upgradePath[upgradeName][0] : null;
+  }
+
+  /**
+   * Gets the data representation of the ability.
+   * @returns {Object} The ability data.
+   */
+  getData() {
+    return {
+      name: this.name,
+      description: this.description,
+      upgradeLevel: this.upgradeLevel,
+      cooldown: this.getUpgradeLevel("Cooldown")
+    };
   }
 }
 

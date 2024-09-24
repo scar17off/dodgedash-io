@@ -34,11 +34,10 @@ class MagneticField extends AbilityCreation {
           if (!this.affectedEntities.has(entity.id)) {
             this.affectedEntities.add(entity.id);
           }
-          const movingAway = (dx * entity.velocity.x + dy * entity.velocity.y) < 0;
-          if (!movingAway) {
-            entity.velocity.x *= -1;
-            entity.velocity.y *= -1;
-          }
+          const repulsionForce = 0.5;
+          const angle = Math.atan2(dy, dx);
+          entity.velocity.x -= Math.cos(angle) * repulsionForce;
+          entity.velocity.y -= Math.sin(angle) * repulsionForce;
         } else {
           this.affectedEntities.delete(entity.id);
         }
@@ -66,13 +65,14 @@ class Magnetize extends Ability {
       "Duration": [4, 4.5, 5, 5.5, 6]
     };
     this.energyCost = 15;
+    this.activeField = null;
   }
 
   use(player, area) {
     const currentTime = Date.now();
     const cooldown = this.getUpgradeLevel("Cooldown");
 
-    if (currentTime - this.lastUse >= cooldown * 1000 && player.energy >= this.energyCost) {
+    if (currentTime - this.lastUse >= cooldown * 1000 && player.energy >= this.energyCost && !this.activeField) {
       super.use();
       player.energy -= this.energyCost;
       const field = new MagneticField(player);
@@ -80,6 +80,11 @@ class Magnetize extends Ability {
       field.radius = this.getUpgradeLevel("Field Radius");
       field.duration = this.getUpgradeLevel("Duration") * 1000;
       area.abilityCreations.push(field);
+      this.activeField = field;
+
+      setTimeout(() => {
+        this.activeField = null;
+      }, field.duration);
     }
   }
 }

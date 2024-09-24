@@ -82,7 +82,7 @@ function changePlayerArea(player, direction) {
     if (playerIndex !== -1) {
       currentArea.players.splice(playerIndex, 1);
     }
-    
+
     // Unload the current area if it's empty
     if (currentArea.players.length === 0) {
       currentRegion.unloadArea(oldAreaNumber);
@@ -109,7 +109,7 @@ function changePlayerArea(player, direction) {
         y: newArea.position.y + (relativeY * newArea.size.height)
       };
     }
-    
+
     const playerData = player.getPlayerData();
     player.socket.emit('playerUpdate', playerData);
 
@@ -196,6 +196,7 @@ io.on("connection", socket => {
     socket.emit('areaData', currentArea.getAreaData());
     socket.emit('selfId', player.id);
     socket.emit('playerUpdate', player.getPlayerData());
+    socket.emit('heroUpdate', { abilities: player.abilities }); // Fixes the bug of the abilities not showing up
     socket.to(`${player.regionName}-${player.areaNumber}`).emit('newPlayer', player.getPlayerData());
 
     const existingPlayers = currentArea.players
@@ -223,7 +224,8 @@ io.on("connection", socket => {
   });
 
   socket.on('abilityUse', abilityNumber => {
-    if (!player.abilities[abilityNumber] || player.deathTimer !== -1) return;
+    if (!player.abilities[abilityNumber] || player.deathTimer !== -1) return; // if the ability is not defined or the player is dead, do not use it
+    if (!player.abilities[abilityNumber].unlocked) return; // If the ability is not unlocked, do not use it
     const currentArea = getArea(player.regionName, player.areaNumber);
     player.abilities[abilityNumber].use(player, currentArea);
   });
@@ -248,9 +250,12 @@ io.on("connection", socket => {
     } else if (upgradeNumber === 2 && player.energyRegen < config.upgrades.maxEnergyRegen) {
       player.energyRegen += 0.5;
       updatedProperties.energyRegen = player.energyRegen;
-    } else if (player.abilities[upgradeNumber - stats - 1]) {
-      player.abilities[upgradeNumber - abilities - 1].upgrade();
-      updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+    } else if (upgradeNumber >= stats && upgradeNumber < stats + abilities) {
+      const abilityIndex = upgradeNumber - stats;
+      if (player.abilities[abilityIndex]) {
+        player.abilities[abilityIndex].upgrade();
+        updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+      }
     }
 
     if (Object.keys(updatedProperties).length > 0) {
@@ -299,7 +304,7 @@ const gameLoop = () => {
         player.update(area);
 
         // Update energy
-        if(player.energy < player.maxEnergy) {
+        if (player.energy < player.maxEnergy) {
           player.energy += player.energyRegen / (config.fps / 2);
           const client = server.clients.find(c => c.id === player.id);
           if (client) {
@@ -308,7 +313,7 @@ const gameLoop = () => {
             });
           }
         }
-        
+
         // Check if player should change areas
         if (player.isInNextAreaZone(area)) {
           changePlayerArea(player, 'next');
@@ -326,19 +331,19 @@ const gameLoop = () => {
             const client = server.clients.find(c => c.player.id === player.id);
             const socket = client.ws;
             const respawnArea = server.getArea(server.regions[player.regionName], player.areaNumber);
-            
+
             // Remove player from old area
             const oldArea = server.getArea(server.regions[player.regionName], oldAreaNumber);
             const playerIndex = oldArea.players.indexOf(player);
             if (playerIndex !== -1) {
               oldArea.players.splice(playerIndex, 1);
             }
-            
+
             // Add player to new area
             if (!respawnArea.players.includes(player)) {
               respawnArea.players.push(player);
             }
-            
+
             // Update client with new player data
             socket.emit('playerUpdate', player.getPlayerData());
             socket.emit('areaData', respawnArea.getAreaData());
@@ -346,14 +351,14 @@ const gameLoop = () => {
               areaData: respawnArea.getAreaData(),
               playerUpdate: player.getPlayerData()
             });
-            
+
             // Update room subscriptions
             socket.leave(`${player.regionName}-${oldAreaNumber}`);
             socket.join(`${player.regionName}-${player.areaNumber}`);
-            
+
             // Notify other players about the respawned player
             socket.to(`${player.regionName}-${player.areaNumber}`).emit('playerJoined', player.getPlayerData());
-          
+
             // Update the leaderboard
             sendLeaderboardUpdate();
           }
@@ -366,7 +371,7 @@ const gameLoop = () => {
             break; // Exit the loop once a collision is detected
           }
         }
-        
+
         // Check for collisions with other players in the same area
         if (player.deathTimer === -1) {  // Only check collisions if player is alive
           for (const otherPlayer of area.players) {
@@ -400,11 +405,11 @@ const gameLoop = () => {
     }
   }
 
-   // Send ability creation updates
-   for (const region of Object.values(regions)) {
+  // Send ability creation updates
+  for (const region of Object.values(regions)) {
     for (const area of region.getLoadedAreas()) {
       const abilityCreationData = area.abilityCreations.map(entity => entity.getCreationData());
-      if(abilityCreationData.length > 0) {
+      if (abilityCreationData.length > 0) {
         io.to(`${region.regionName}-${area.areaNumber}`).emit('abilityCreationUpdate', abilityCreationData);
       }
     }

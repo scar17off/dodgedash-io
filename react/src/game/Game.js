@@ -186,6 +186,13 @@ const Game = ({ nickname, hero }) => {
       setMessages(prevMessages => [...prevMessages, { playerName, message, color }]);
     });
 
+    socket.on('heroUpdate', (updatedProperties) => {
+      updateGameState(prevState => ({
+        ...prevState,
+        localPlayer: { ...prevState.localPlayer, ...updatedProperties }
+      }));
+    });
+
     const gameLoop = () => {
       const { mouse, keys, mouseMovement } = controlsRef.current;
       const currentInput = { keys, mouseMovement, mouse };

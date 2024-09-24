@@ -1,6 +1,6 @@
+import React, { useState, useEffect } from "react";
 import "./HeroPanel.css";
 import protocol from "../protocol.json";
-import React from "react";
 
 import IceWall from "../svg/IceWall.svg";
 import ColdImmunity from "../svg/ColdImmunity.svg";
@@ -28,15 +28,15 @@ const HeroPanel = ({ localPlayer }) => {
         <Upgrade name="Speed" value={localPlayer.speed} />
         <Upgrade name="Energy" value={`${Math.round(localPlayer.energy)}/${localPlayer.maxEnergy}`} />
         <Upgrade name="Regen" value={localPlayer.energyRegen} />
-        {heroData.abilities && heroData.abilities.map((ability, index) => (
-          <Upgrade key={index} name={ability.name} id={index} isAbility />
+        {localPlayer.abilities && localPlayer.abilities.map((ability, index) => (
+          <Upgrade key={index} name={ability.name} id={index} level={ability.upgradeLevel} isAbility isUnlocked={ability.unlocked} />
         ))}
       </div>
     </div>
   );
 };
 
-const UpgradeBar = ({ curr, min, max, step }) => {
+const UpgradeBar = ({ curr, min, max, step, onChange }) => {
   return (
     <input
       type="range"
@@ -45,16 +45,21 @@ const UpgradeBar = ({ curr, min, max, step }) => {
       max={max}
       step={step}
       value={curr}
-      onChange={() => {}}
+      onChange={onChange}
+      disabled
     />
   );
 };
 
-const Upgrade = ({ name, value, isAbility = false }) => {
+const Upgrade = ({ name, value, isAbility = false, level = 0, isUnlocked = true }) => {
   const svgMap = {
     IceWall,
     ColdImmunity,
     Magnetize
+  };
+
+  const abilityStyle = {
+    opacity: isUnlocked ? 1 : 0.5
   };
 
   return (
@@ -62,8 +67,8 @@ const Upgrade = ({ name, value, isAbility = false }) => {
       {!isAbility && <h3>{name}</h3>}
       {isAbility ? (
         <>
-          <UpgradeBar curr={0} min={1} max={5} step={1} />
-          <div className="ability-upgrade">
+          {isUnlocked && <UpgradeBar curr={level} min={0} max={5} step={1} />}
+          <div className="ability-upgrade" style={abilityStyle}>
             <img src={svgMap[name.replace(/\s+/g, '')]} alt={name} />
           </div>
         </>

@@ -1,5 +1,6 @@
 const Entity = require('./Entity');
 const { bounceMovement } = require('./Behaviour');
+const { circleCollision } = require('../collision');
 
 module.exports = class Connectus extends Entity {
   constructor() {
@@ -62,7 +63,7 @@ module.exports = class Connectus extends Entity {
   }
 
   collideCheck(entity) {
-    if (super.collideCheck(entity)) {
+    if (circleCollision(entity, this)) {
       return true;
     }
     if (this.line) {

@@ -23,7 +23,7 @@ export function setupControls(canvas) {
     'Digit3': 2,
     'Digit4': 3,
     'Digit5': 4
-  };  
+  };
 
   canvas.addEventListener('mousemove', (e) => {
     controls.mouse.x = e.clientX - canvas.width / 2;
@@ -38,13 +38,13 @@ export function setupControls(canvas) {
     if (key && !controls.keys[key]) {
       controls.keys[key] = true;
       socket.emit('keyPress', { key, pressed: true });
-      
+
       const abilityMatch = key.match(/^ability(\d)$/);
       if (abilityMatch) {
         socket.emit('abilityUse', parseInt(abilityMatch[1]) - 1);
       }
     }
-    
+
     if (upgradeIndex !== undefined && !controls.upgradeKeys[e.code]) {
       controls.upgradeKeys[e.code] = true;
       socket.emit('upgrade', upgradeIndex);
@@ -59,7 +59,7 @@ export function setupControls(canvas) {
       controls.keys[key] = false;
       socket.emit('keyPress', { key, pressed: false });
     }
-    
+
     if (upgradeIndex !== undefined) {
       controls.upgradeKeys[e.code] = false;
     }

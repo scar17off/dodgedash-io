@@ -17,11 +17,11 @@ const HeroSelect = ({ nickname, onHeroSelect }) => {
       <h2>Select Your Hero</h2>
       <div className="hero-grid">
         {heroType.map((hero) => (
-          <div 
-            key={hero.id} 
-            className="hero-card" 
-            onClick={() => onHeroSelect(hero.name)} 
-            style={{ 
+          <div
+            key={hero.id}
+            className="hero-card"
+            onClick={() => onHeroSelect(hero.name)}
+            style={{
               borderColor: hero.color,
               backgroundColor: hexToRgba(hero.color, 0.2),
               color: hero.color

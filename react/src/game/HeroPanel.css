@@ -12,7 +12,8 @@
   width: auto;
   height: 80px;
   justify-content: space-between;
-  pointer-events: none; /* This makes mouse events pass through to the canvas */
+  pointer-events: none;
+  /* This makes mouse events pass through to the canvas */
 }
 
 .info-panel {

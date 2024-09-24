@@ -1,3 +1,5 @@
+const { circleCollision } = require("../collision");
+
 /**
  * Represents an entity in the game.
  */
@@ -46,7 +48,7 @@ class Entity {
    * @returns {boolean} True if the entities collide, false otherwise.
    */
   collideCheck(entity) {
-    if (Math.hypot(this.position.x - entity.position.x, this.position.y - entity.position.y) <= this.radius + entity.radius) {
+    if (circleCollision(this, entity)) {
       return true;
     }
     return false;

@@ -40,7 +40,7 @@ const Leaderboard = () => {
       borderRadius: '5px',
       overflow: 'hidden'
     }}>
-      <div 
+      <div
         onClick={toggleExpand}
         style={{
           padding: '10px',
@@ -58,7 +58,7 @@ const Leaderboard = () => {
               <h4 style={{ color: 'white', borderBottom: '1px solid white' }}>{regionName}</h4>
               {regionPlayers.map((player, index) => (
                 <div key={player.id} style={{ display: 'flex', alignItems: 'center', margin: '5px 0' }}>
-                  <div 
+                  <div
                     style={{
                       width: '20px',
                       height: '20px',

@@ -40,11 +40,11 @@ function isWithinBorder(position, border, radius = 0) {
  * @returns {boolean} - True if the position is within the border or start zone, false otherwise.
  */
 function isWithinBorderOrStartZone(position, border, startZone, radius = 0) {
-  return isWithinBorder(position, border, radius) || 
+  return isWithinBorder(position, border, radius) ||
     (position.x >= startZone.position.x + radius &&
-     position.x <= startZone.position.x + startZone.size.width - radius &&
-     position.y >= startZone.position.y + radius &&
-     position.y <= startZone.position.y + startZone.size.height - radius);
+      position.x <= startZone.position.x + startZone.size.width - radius &&
+      position.y >= startZone.position.y + radius &&
+      position.y <= startZone.position.y + startZone.size.height - radius);
 }
 
 /**

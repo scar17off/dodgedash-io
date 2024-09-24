@@ -1,4 +1,5 @@
 const Entity = require('./Entity');
+const { circleCollision } = require("../collision");
 
 class Mine extends Entity {
   constructor() {
@@ -39,10 +40,11 @@ class Mine extends Entity {
 
   collideCheck(entity) {
     if (this.exploded) return false;
-    if (Math.hypot(this.position.x - entity.position.x, this.position.y - entity.position.y) <= this.radius) {
+    if (circleCollision(this, entity)) {
+      this.explode(entity);
       return true;
     }
-    if (Math.hypot(this.position.x - entity.position.x, this.position.y - entity.position.y) <= this.detectionRange) {
+    if (circleCollision(this, entity)) {
       this.explode(entity);
       return true;
     }

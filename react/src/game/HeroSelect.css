@@ -9,8 +9,10 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   justify-content: center;
-  max-width: 1000px; /* Adjust this value based on your design preferences */
-  margin: 0 auto; /* This centers the grid horizontally */
+  max-width: 1000px;
+  /* Adjust this value based on your design preferences */
+  margin: 0 auto;
+  /* This centers the grid horizontally */
 }
 
 .hero-card {

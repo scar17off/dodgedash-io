@@ -42,7 +42,7 @@ const Game = ({ nickname, hero }) => {
       gameStateRef.current = newState;
       window.gameState = gameStateRef.current;
       return newState;
-    }); 
+    });
   }, []);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const Game = ({ nickname, hero }) => {
       updateGameState(prevState => {
         const localPlayer = playersData.find(p => p.id === prevState.selfId);
         const otherPlayers = playersData.filter(p => p.id !== prevState.selfId);
-        
+
         return {
           ...prevState,
           localPlayer: localPlayer ? { ...prevState.localPlayer, ...localPlayer } : prevState.localPlayer,
@@ -169,7 +169,7 @@ const Game = ({ nickname, hero }) => {
     socket.on('playerMove', (playerData) => {
       updateGameState(prevState => ({
         ...prevState,
-        players: prevState.players.map(p => 
+        players: prevState.players.map(p =>
           p.id === playerData.id ? { ...p, ...playerData, lastUpdate: Date.now() } : p
         )
       }));
@@ -207,7 +207,7 @@ const Game = ({ nickname, hero }) => {
       if (currentGameState.localPlayer) {
         cameraRef.current.update(currentGameState.localPlayer.position.x, currentGameState.localPlayer.position.y);
       }
-      
+
       rendererRef.current.render(currentGameState);
 
       requestAnimationFrame(gameLoop);

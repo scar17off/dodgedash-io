@@ -3,7 +3,7 @@ const { heroType } = require("../protocol.json");
 
 const abilityTypes = require("../ability/Abilities");
 const Ability = require("../ability/Ability");
-
+const { circleCollision } = require('../collision');
 const defaultHero = heroType[0];
 
 /**
@@ -142,10 +142,7 @@ class Player {
   }
 
   collideCheck(player) {
-    return this.position.x - this.radius < player.position.x + player.radius &&
-           this.position.x + this.radius > player.position.x - player.radius &&
-           this.position.y - this.radius < player.position.y + player.radius &&
-           this.position.y + this.radius > player.position.y - player.radius;
+    return circleCollision(this, player);
   }
 
   getRandomSpawnPosition(area) {

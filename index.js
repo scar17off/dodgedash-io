@@ -197,7 +197,7 @@ io.on("connection", socket => {
     socket.emit('areaData', currentArea.getAreaData());
     socket.emit('selfId', player.id);
     socket.emit('playerUpdate', player.getPlayerData());
-    socket.emit('heroUpdate', { abilities: player.abilities }); // Fixes the bug of the abilities not showing up
+    socket.emit('heroUpdate', player.getHeroData());
     socket.to(`${player.regionName}-${player.areaNumber}`).emit('newPlayer', player.getPlayerData());
 
     const existingPlayers = currentArea.players
@@ -236,30 +236,34 @@ io.on("connection", socket => {
 
   socket.on('upgrade', upgradeNumber => {
     const currentTime = Date.now();
-    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN) return;
+    if (currentTime - lastUpgradeTime < UPGRADE_COOLDOWN || player.upgradePoints <= 0) return;
 
     const updatedProperties = {};
-    const stats = 3;
+    const stats = 3; // Speed, Energy, Regen. This is the number of stats before abilities.
     const abilities = player.abilities.length;
 
     if (upgradeNumber === 0 && player.baseSpeed < config.upgrades.maxSpeed) {
       player.baseSpeed += 0.5;
       updatedProperties.speed = player.baseSpeed;
+      player.upgradePoints--;
     } else if (upgradeNumber === 1 && player.maxEnergy < config.upgrades.maxEnergy) {
       player.maxEnergy += 5;
       updatedProperties.maxEnergy = player.maxEnergy;
+      player.upgradePoints--;
     } else if (upgradeNumber === 2 && player.energyRegen < config.upgrades.maxEnergyRegen) {
       player.energyRegen += 0.5;
       updatedProperties.energyRegen = player.energyRegen;
+      player.upgradePoints--;
     } else if (upgradeNumber >= stats && upgradeNumber < stats + abilities) {
       const abilityIndex = upgradeNumber - stats;
       if (player.abilities[abilityIndex]) {
-        player.abilities[abilityIndex].upgrade();
+        player.abilities[abilityIndex].upgrade(player);
         updatedProperties.abilities = player.abilities.map(ability => ability.getData());
       }
     }
 
     if (Object.keys(updatedProperties).length > 0) {
+      updatedProperties.upgradePoints = player.upgradePoints;
       socket.emit('heroUpdate', updatedProperties);
       lastUpgradeTime = currentTime;
     }

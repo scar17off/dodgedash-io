@@ -116,6 +116,24 @@ class Player {
     this.energyRegen = 1;
 
     /**
+     * The level of the player.
+     * @type {number}
+     */
+    this.level = 1;
+
+    /**
+     * The upgrade points of the player.
+     * @type {number}
+     */
+    this.upgradePoints = 0;
+
+    /**
+     * The experience of the player.
+     * @type {number}
+     */
+    this.xp = 0;
+
+    /**
      * The abilities of the player.
      * @type {Array<Ability>}
      */
@@ -275,10 +293,34 @@ class Player {
   }
 
   /**
+   * Retrieves the hero's experience amount to next level.
+   * @returns {number} The experience amount to next level.
+   */
+  getXpToNextLevel() {
+    return 5 * this.level;
+  }
+
+  /**
+   * Adds experience to the player.
+   * @param {number} xp - The amount of experience to add.
+   */
+  addXp(xp) {
+    this.xp += xp;
+    if (this.xp >= this.getXpToNextLevel()) {
+      this.level++;
+      this.upgradePoints++;
+      this.xp = 0;
+    }
+  }
+
+  /**
    * Retrieves the hero's data.
    * @returns {Object} An object containing the hero's data.
    * @property {string} name - The hero's name.
    * @property {number} level - The hero's level.
+   * @property {number} xp - The hero's experience.
+   * @property {number} xpToNextLevel - The hero's experience to next level.
+   * @property {number} upgradePoints - The hero's upgrade points.
    * @property {string} nickname - The hero's nickname.
    * @property {number} speed - The hero's speed.
    * @property {number} energy - The hero's current energy.
@@ -290,6 +332,9 @@ class Player {
     return {
       name: this.name,
       level: this.level,
+      xp: this.xp,
+      xpToNextLevel: this.getXpToNextLevel(),
+      upgradePoints: this.upgradePoints,
       nickname: this.nickname,
       speed: this.baseSpeed,
       energy: this.energy,

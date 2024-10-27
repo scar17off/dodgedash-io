@@ -47,8 +47,10 @@ class Ability {
 
   /**
    * Uses the ability.
+   * @param {Player} player - The player using the ability.
+   * @param {Area} area - The area where the ability is being used.
    */
-  use() {
+  use(player, area) {
     const currentTime = Date.now();
     const cooldown = this.getUpgradeLevel("Cooldown");
 
@@ -59,17 +61,18 @@ class Ability {
 
   /**
    * Upgrades the ability.
+   * @param {Player} player - The player upgrading the ability.
    */
-  upgrade() {
+  upgrade(player) {
     if (!this.unlocked) {
       this.unlocked = true;
       this.upgradeLevel = 1;
-      return;
-    }
-    for (const key in this.upgradePath) {
-      if (this.upgradeLevel < this.upgradePath[key].length) {
-        this.upgradeLevel++;
-        return;
+    } else {
+      for (const key in this.upgradePath) {
+        if (this.upgradeLevel < this.upgradePath[key].length) {
+          this.upgradeLevel++;
+          break;
+        }
       }
     }
   }

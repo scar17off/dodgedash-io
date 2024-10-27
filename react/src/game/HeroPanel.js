@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./HeroPanel.css";
 import protocol from "../protocol.json";
 
@@ -15,11 +15,14 @@ const HeroPanel = ({ localPlayer }) => {
     console.error(`Hero type ${localPlayer.heroType} not found in protocol`);
     return <div className="hero-info-panel">Error: Hero data not found</div>;
   }
+
+  const xpProgress = (localPlayer.xp / localPlayer.xpToNextLevel) * 100;
+
   return (
     <div className="hero-info-panel">
       <div className="info-panel">
         <h2>{heroData.name}</h2>
-        <div className="hero-avatar">
+        <div className="hero-avatar" style={{'--xp-progress': `${xpProgress}%`}}>
           <span className="hero-level">{localPlayer.level}</span>
         </div>
         <p>{localPlayer.name}</p>

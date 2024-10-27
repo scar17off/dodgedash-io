@@ -24,7 +24,9 @@ const Game = ({ nickname, hero }) => {
       energyRegen: 0,
       name: nickname,
       regionName: 'Unknown',
-      areaNumber: 0
+      areaNumber: 0,
+      level: 1,
+      xp: 0
     },
     players: [],
     entities: [],

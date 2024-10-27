@@ -306,10 +306,11 @@ class Player {
    */
   addXp(xp) {
     this.xp += xp;
-    if (this.xp >= this.getXpToNextLevel()) {
+    while (this.xp >= this.getXpToNextLevel()) {
+      const xpToNextLevel = this.getXpToNextLevel();
+      this.xp -= xpToNextLevel;
       this.level++;
       this.upgradePoints++;
-      this.xp = 0;
     }
   }
 

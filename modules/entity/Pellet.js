@@ -17,7 +17,7 @@ class Pellet extends Entity {
     this.update = (area) => {
       if (this.area !== area) {
         this.area = area;
-        this.xp = (this.area.areaNumber == 0 ? 1 : this.area.areaNumber) * 200;
+        this.xp = (this.area.areaNumber == 0 ? 1 : this.area.areaNumber) * 2;
         this.respawn();
       }
     };

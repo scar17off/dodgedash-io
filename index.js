@@ -12,6 +12,7 @@ const { log } = require("./modules/utils");
 const { circleCollision } = require("./modules/collision");
 const { heroType } = require("./modules/protocol.json");
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
+const Pellet = require('./modules/entity/Pellet');
 
 log("INFO", "Starting server...");
 
@@ -371,18 +372,18 @@ const gameLoop = () => {
 
         // Check for collisions with entities in the same area
         for (const entity of area.entities) {
-          if (circleCollision(player, entity) && player.deathTimer == -1) {
+          if (entity.collideCheck(player) && player.deathTimer == -1 && entity.entityType !== 'Pellet') { // Pellets do not kill players
             player.deathTimer = area.deathTimer * 1000;
-            break; // Exit the loop once a collision is detected
+            break;
           }
         }
 
         // Check for collisions with other players in the same area
         if (player.deathTimer === -1) {  // Only check collisions if player is alive
           for (const otherPlayer of area.players) {
-            if (otherPlayer.id !== player.id && circleCollision(player, otherPlayer)) {
+            if (otherPlayer.id !== player.id && player.collideCheck(otherPlayer)) {
               otherPlayer.deathTimer = -1;
-              break; // Exit the loop once a collision is detected
+              break;
             }
           }
         }

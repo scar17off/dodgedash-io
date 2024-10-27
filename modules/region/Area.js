@@ -1,4 +1,5 @@
 const entityTypes = require('../entity/Enemies');
+const Pellet = require('../entity/Pellet');
 const Player = require('../player/Player');
 const presets = require('./presets.json');
 
@@ -115,6 +116,9 @@ class Area {
         this.entities.push(entity);
       }
     });
+    for(let i = 0; i < 10; i++) {
+      this.entities.push(new Pellet(this));
+    }
   }
 
   getRandomPosition(entityRadius) {

@@ -71,7 +71,7 @@ class Area {
     this.generateEntities(data.entities);
   }
 
-  generateEntities(entityData) {
+  generateEntities(entityData, spawnPellets = true) {
     this.entities = [];
     if (!entityData) return;
     entityData.forEach(data => {
@@ -116,8 +116,10 @@ class Area {
         this.entities.push(entity);
       }
     });
-    for(let i = 0; i < 10; i++) {
-      this.entities.push(new Pellet(this));
+    if(spawnPellets) {
+      for(let i = 0; i < 10; i++) {
+        this.entities.push(new Pellet(this));
+      }
     }
   }
 

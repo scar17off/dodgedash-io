@@ -23,7 +23,7 @@ class Pellet extends Entity {
     };
   }
 
-  collideCheck(entity) {
+  collideCheck() {
     return false;
   }
 

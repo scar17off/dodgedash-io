@@ -48,10 +48,7 @@ class Entity {
    * @returns {boolean} True if the entities collide, false otherwise.
    */
   collideCheck(entity) {
-    if (circleCollision(this, entity)) {
-      return true;
-    }
-    return false;
+    return circleCollision(this, entity);
   }
 
   /**

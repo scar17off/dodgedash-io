@@ -9,10 +9,8 @@ const config = require("./config.json");
 const Region = require("./modules/region/Region");
 const Client = require("./modules/player/Client");
 const { log } = require("./modules/utils");
-const { circleCollision } = require("./modules/collision");
 const { heroType } = require("./modules/protocol.json");
 const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
-const Pellet = require('./modules/entity/Pellet');
 
 log("INFO", "Starting server...");
 

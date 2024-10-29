@@ -1,4 +1,3 @@
-const { circleCollision } = require('../collision');
 const Entity = require('./Entity');
 
 function getRandomColor() {
@@ -29,6 +28,7 @@ class Pellet extends Entity {
 
   respawn() {
     if (!this.area) return;
+    this.color = getRandomColor();
     this.position = this.area.getRandomPosition(this.radius);
   }
 

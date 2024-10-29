@@ -71,6 +71,11 @@ class Area {
     this.generateEntities(data.entities);
   }
 
+  /**
+   * Generates entities in the area.
+   * @param {Array<Object>} entityData - The data for the entities.
+   * @param {boolean} [spawnPellets=true] - Whether to spawn pellets.
+   */
   generateEntities(entityData, spawnPellets = true) {
     this.entities = [];
     if (!entityData) return;
@@ -123,6 +128,13 @@ class Area {
     }
   }
 
+  /**
+   * Gets a random position within the area.
+   * @param {number} entityRadius - The radius of the entity.
+   * @returns {Object} The random position.
+   * @property {number} x - The x-coordinate of the position.
+   * @property {number} y - The y-coordinate of the position.
+   */
   getRandomPosition(entityRadius) {
     const margin = entityRadius;
     let x, y;
@@ -144,6 +156,46 @@ class Area {
     return { x, y };
   }
 
+  /**
+   * Gets the data for the area.
+   * @returns {Object} The area data.
+   * @property {Object} position - The position of the area.
+   * @property {number} position.x - The x-coordinate of the area.
+   * @property {number} position.y - The y-coordinate of the area.
+   * @property {Object} size - The size of the area.
+   * @property {number} size.width - The width of the area.
+   * @property {number} size.height - The height of the area.
+   * @property {string} background - The background color of the area.
+   * @property {Array<Object>} border - The border of the area.
+   * @property {Object} startZone - The start zone of the area.
+   * @property {Object} startZone.position - The position of the start zone.
+   * @property {number} startZone.position.x - The x-coordinate of the start zone.
+   * @property {number} startZone.position.y - The y-coordinate of the start zone.
+   * @property {Object} startZone.size - The size of the start zone.
+   * @property {number} startZone.size.width - The width of the start zone.
+   * @property {number} startZone.size.height - The height of the start zone.
+   * @property {Object} finishZone - The finish zone of the area.
+   * @property {Object} finishZone.position - The position of the finish zone.
+   * @property {number} finishZone.position.x - The x-coordinate of the finish zone.
+   * @property {number} finishZone.position.y - The y-coordinate of the finish zone.
+   * @property {Object} finishZone.size - The size of the finish zone.
+   * @property {number} finishZone.size.width - The width of the finish zone.
+   * @property {number} finishZone.size.height - The height of the finish zone.
+   * @property {Object} nextAreaZone - The next area zone of the area.
+   * @property {Object} nextAreaZone.position - The position of the next area zone.
+   * @property {number} nextAreaZone.position.x - The x-coordinate of the next area zone.
+   * @property {number} nextAreaZone.position.y - The y-coordinate of the next area zone.
+   * @property {Object} nextAreaZone.size - The size of the next area zone.
+   * @property {number} nextAreaZone.size.width - The width of the next area zone.
+   * @property {number} nextAreaZone.size.height - The height of the next area zone.
+   * @property {Object} previousAreaZone - The previous area zone of the area.
+   * @property {Object} previousAreaZone.position - The position of the previous area zone.
+   * @property {number} previousAreaZone.position.x - The x-coordinate of the previous area zone.
+   * @property {number} previousAreaZone.position.y - The y-coordinate of the previous area zone.
+   * @property {Object} previousAreaZone.size - The size of the previous area zone.
+   * @property {number} previousAreaZone.size.width - The width of the previous area zone.
+   * @property {number} previousAreaZone.size.height - The height of the previous area zone.
+   */
   getAreaData() {
     return {
       position: this.position,

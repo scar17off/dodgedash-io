@@ -7,12 +7,10 @@
 .hero-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 15px;
   justify-content: center;
-  max-width: 1000px;
-  /* Adjust this value based on your design preferences */
+  max-width: 900px;
   margin: 0 auto;
-  /* This centers the grid horizontally */
 }
 
 .hero-card {
@@ -26,39 +24,129 @@
   transition: transform 0.2s, box-shadow 0.2s;
   border: 2px solid;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: 160px;
+  z-index: 1;
 }
 
 .hero-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 .hero-name {
-  font-size: x-large;
-  margin-bottom: 10px;
+  font-size: 20px;
+  margin-bottom: 15px;
   color: inherit;
 }
 
 .hero-abilities {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 10px;
+  justify-content: center;
+  gap: 20px;
+  margin: 5px 0;
 }
 
 .ability-icon {
-  width: 30px;
-  height: 30px;
+  width: 48px;
+  height: 48px;
   background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ability-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-details-popup {
+  position: absolute;
+  left: 50%;
+  background-color: rgba(0, 0, 0, 0.95);
+  padding: 15px;
+  border-radius: 8px;
+  width: 300px;
+  z-index: 3;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Сlass for top positioning */
+.popup-top {
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+}
+
+/* Сlass for bottom positioning */
+.popup-bottom {
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+}
+
+/* Arrow for top popup */
+.popup-top::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(0, 0, 0, 0.95);
+}
+
+/* Arrow for bottom popup */
+.popup-bottom::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid rgba(0, 0, 0, 0.95);
+}
+
+.hero-description {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.abilities-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ability-detail {
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
 }
 
+.ability-detail h3 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: white;
+}
+
+.ability-detail p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
 .hero-circle {
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  margin: 0 10px;
+  flex-shrink: 0;
 }
 
 .hero-info {

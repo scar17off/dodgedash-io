@@ -200,6 +200,7 @@ class Area {
     return {
       position: this.position,
       size: this.size,
+      areaNumber: this.areaNumber,
       background: this.background,
       border: this.border,
       startZone: this.startZone,

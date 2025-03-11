@@ -62,19 +62,40 @@ class Ability {
   /**
    * Upgrades the ability.
    * @param {Player} player - The player upgrading the ability.
+   * @param {boolean} dryRun - Whether to perform a dry run without actually upgrading.
+   * @returns {boolean} Whether the upgrade was successful.
    */
-  upgrade(player) {
-    if (!this.unlocked) {
-      this.unlocked = true;
-      this.upgradeLevel = 1;
-    } else {
-      for (const key in this.upgradePath) {
-        if (this.upgradeLevel < this.upgradePath[key].length) {
-          this.upgradeLevel++;
-          break;
-        }
+  upgrade(player, dryRun = false) {
+    // Get the first upgrade path's length as max upgrades
+    const firstUpgradePath = Object.values(this.upgradePath)[0];
+    if (!firstUpgradePath) return false;
+    
+    const currentUpgrade = this.upgradeLevel;
+    const maxUpgrades = firstUpgradePath.length;
+
+    // Check if we can upgrade
+    if (currentUpgrade >= maxUpgrades - 1) {
+      return false;
+    }
+
+    // If this is just a check, return true without performing the upgrade
+    if (dryRun) {
+      return true;
+    }
+
+    // Actually perform the upgrade
+    this.upgradeLevel++;
+    this.unlocked = true;
+    
+    // Update values based on upgrade path
+    for (const key in this.upgradePath) {
+      const value = this.upgradePath[key][this.upgradeLevel];
+      if (value !== undefined) {
+        this[key.toLowerCase()] = value;
       }
     }
+
+    return true;
   }
 
   /**

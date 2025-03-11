@@ -18,11 +18,11 @@ const app = express();
 app.use(cors());
 
 // Serve static files from the React build directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'react', 'build')));
 
 // Catch-all route should point to the React build directory
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'react', 'build', 'index.html'));
 });
 
 const httpServer = http.createServer(app);
@@ -50,6 +50,9 @@ global.server = {
       region.loadArea(areaNumber);
       area = region.getArea(areaNumber);
     }
+    
+    // Make sure areaNumber is included in the area data
+    area.areaNumber = areaNumber;
     return area;
   }
 }
@@ -265,8 +268,15 @@ io.on("connection", socket => {
     } else if (upgradeNumber >= stats && upgradeNumber < stats + abilities) {
       const abilityIndex = upgradeNumber - stats;
       if (player.abilities[abilityIndex]) {
-        player.abilities[abilityIndex].upgrade(player);
-        updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+        // Check if ability can be upgraded before spending points
+        const ability = player.abilities[abilityIndex];
+        const canUpgrade = ability.upgrade(player, true);
+
+        if (canUpgrade) {
+          ability.upgrade(player);
+          player.upgradePoints--;
+          updatedProperties.abilities = player.abilities.map(ability => ability.getData());
+        }
       }
     }
 
@@ -307,6 +317,7 @@ function getArea(regionName, areaNumber) {
     server.regions[regionName].loadArea(areaNumber);
     area = server.regions[regionName].getArea(areaNumber);
   }
+  
   return area;
 }
 

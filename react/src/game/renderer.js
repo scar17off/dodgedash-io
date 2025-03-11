@@ -30,6 +30,19 @@ class Renderer {
       area.startZone.size.height
     );
 
+    // Draw cyan line at the right edge of start zone (only in first area)
+    if (area.areaNumber === 0) {
+      this.context.beginPath();
+      this.context.strokeStyle = 'rgba(0, 255, 255, 0.5)'; // Cyan color
+      const lineWidth = 50;
+      this.context.lineWidth = lineWidth;
+      // Draw line on the right side of the start zone
+      const x = area.startZone.position.x + area.startZone.size.width - (lineWidth / 2);
+      this.context.moveTo(x, area.startZone.position.y);
+      this.context.lineTo(x, area.startZone.position.y + area.startZone.size.height);
+      this.context.stroke();
+    }
+
     // Draw finish zone
     this.context.fillStyle = 'rgba(255, 255, 0, 0.5)';
     this.context.fillRect(
@@ -61,7 +74,7 @@ class Renderer {
 
     // Draw grid if option is enabled
     if (this.options.grid) {
-      const gridStep = 100;
+      const gridStep = 50;
       this.context.strokeStyle = this.options.darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
       this.context.lineWidth = 1;
 

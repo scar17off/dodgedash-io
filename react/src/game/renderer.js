@@ -231,6 +231,24 @@ class Renderer {
       for (const abilityCreation of gameState.abilityCreations) this.renderAbilityCreations(abilityCreation);
     }
 
+    // First render pellets
+    if (gameState && gameState.entities && gameState.entities.length > 0) {
+      for (const entity of gameState.entities) {
+        if (entity.entityType === 'Pellet') {
+          this.renderEntity(entity);
+        }
+      }
+    }
+
+    // Then render other entities
+    if (gameState && gameState.entities && gameState.entities.length > 0) {
+      for (const entity of gameState.entities) {
+        if (entity.entityType !== 'Pellet') {
+          this.renderEntity(entity);
+        }
+      }
+    }
+
     // Render local player
     if (gameState && gameState.localPlayer) {
       this.renderPlayer(gameState.localPlayer, true);
@@ -242,13 +260,6 @@ class Renderer {
         if (player.id !== gameState.localPlayer?.id && player.areaNumber === gameState.localPlayer.areaNumber) {
           this.renderPlayer(player);
         }
-      }
-    }
-
-    // Render entities
-    if (gameState && gameState.entities && gameState.entities.length > 0) {
-      for (const entity of gameState.entities) {
-        this.renderEntity(entity);
       }
     }
 

@@ -94,6 +94,7 @@ function changePlayerArea(player, direction) {
   let newAreaNumber = oldAreaNumber;
 
   if (direction === 'next' && oldAreaNumber < Object.keys(currentRegion.areasData).length - 1) {
+    player.completeArea();
     newAreaNumber++;
   } else if (direction === 'previous' && oldAreaNumber > 0) {
     newAreaNumber--;
@@ -423,6 +424,8 @@ const gameLoop = () => {
           if (portal.isPlayerInPortal(player)) {
             const targetRegion = regions[portal.targetRegion];
             if (targetRegion) {
+              player.completeArea();
+
               player.regionName = portal.targetRegion;
               player.areaNumber = 0;
               

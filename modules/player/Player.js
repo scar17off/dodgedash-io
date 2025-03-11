@@ -141,6 +141,8 @@ class Player {
       new abilityTypes.IceWall(),
       new abilityTypes.ColdImmunity()
     ];
+
+    this.completedAreas = new Set(); // Track completed areas as "regionName-areaNumber"
   }
 
   resetInputState() {
@@ -370,8 +372,38 @@ class Player {
       deathTimer: this.deathTimer,
       energy: this.energy,
       maxEnergy: this.maxEnergy,
-      energyRegen: this.energyRegen
+      energyRegen: this.energyRegen,
+      xp: this.xp,
+      completedAreas: Array.from(this.completedAreas)
     }
+  }
+
+  getAreaKey() {
+    return `${this.regionName}-${this.areaNumber}`;
+  }
+
+  completeArea() {
+    const areaKey = this.getAreaKey();
+    if (!this.completedAreas.has(areaKey)) {
+      const xpReward = this.calculateAreaXP();
+      this.addXp(xpReward);
+      this.completedAreas.add(areaKey);
+      
+      this.socket.emit('heroUpdate', {
+        xp: this.xp,
+        level: this.level,
+        xpToNextLevel: this.getXpToNextLevel(),
+        upgradePoints: this.upgradePoints
+      });
+      
+      return true;
+    }
+    return false;
+  }
+
+  calculateAreaXP() {
+    const baseXP = 10;
+    return baseXP + (this.areaNumber * 50);
   }
 }
 

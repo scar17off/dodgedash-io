@@ -12,8 +12,9 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js",
-		"build": "cd react && npm run build",
-		"dev": "concurrently \"cd react && npm run start\" \"nodemon index.js\""
+		"build": "cd react && npm install && npm run build && xcopy /E /I /Y build ..\\public",
+		"dev": "concurrently \"cd react && npm run start\" \"nodemon index.js\"",
+		"install-all": "npm install && cd react && npm install"
 	},
 	"keywords": [
 		"dodgedash",

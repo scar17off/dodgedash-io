@@ -16,10 +16,19 @@ log("INFO", "Starting server...");
 
 const app = express();
 app.use(cors());
+
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Catch-all route should point to the React build directory
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3001", "http://localhost:3000"],
     methods: ["GET", "POST"]
   }
 });
@@ -423,6 +432,7 @@ const gameLoop = () => {
 };
 gameLoop();
 
-httpServer.listen(443, () => {
-  log("INFO", "Server is running on port 443");
+const PORT = process.env.PORT || 3001;
+httpServer.listen(PORT, () => {
+  log("INFO", `Server is running on port ${PORT}`);
 });

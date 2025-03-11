@@ -13,8 +13,8 @@
 		"web-vitals": "^2.1.4"
 	},
 	"scripts": {
-		"start": "react-app-rewired start",
-		"build": "react-app-rewired build",
+		"start": "react-scripts start",
+		"build": "react-scripts build",
 		"test": "react-app-rewired test",
 		"eject": "react-scripts eject"
 	},
@@ -39,5 +39,6 @@
 	"devDependencies": {
 		"@babel/plugin-proposal-private-property-in-object": "^7.21.11",
 		"react-app-rewired": "^2.2.1"
-	}
+	},
+	"homepage": "."
 }

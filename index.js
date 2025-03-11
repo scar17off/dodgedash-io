@@ -10,7 +10,18 @@ const Region = require("./modules/region/Region");
 const Client = require("./modules/player/Client");
 const { log } = require("./modules/utils");
 const { heroType } = require("./modules/protocol.json");
-const areasData = JSON.parse(fs.readFileSync(path.join(__dirname, 'modules', 'region', 'regions.json'), 'utf8'));
+
+// Load regions from data directory
+const regionsData = {};
+const regionsDir = path.join(__dirname, 'modules', 'region', 'data');
+
+fs.readdirSync(regionsDir).forEach(file => {
+  if (file.endsWith('.json')) {
+    const regionName = path.basename(file, '.json');
+    const regionPath = path.join(regionsDir, file);
+    regionsData[regionName] = JSON.parse(fs.readFileSync(regionPath, 'utf8'));
+  }
+});
 
 log("INFO", "Starting server...");
 
@@ -72,7 +83,8 @@ function copyProtocolToReact() {
 
 copyProtocolToReact();
 
-for (const [regionName, regionData] of Object.entries(areasData)) {
+// Initialize regions
+for (const [regionName, regionData] of Object.entries(regionsData)) {
   regions[regionName] = new Region(regionData, regionName);
 }
 
@@ -401,6 +413,61 @@ const gameLoop = () => {
           for (const otherPlayer of area.players) {
             if (otherPlayer.id !== player.id && player.collideCheck(otherPlayer)) {
               otherPlayer.deathTimer = -1;
+              break;
+            }
+          }
+        }
+
+        // Check for portal teleportation
+        for (const portal of area.portals) {
+          if (portal.isPlayerInPortal(player)) {
+            const targetRegion = regions[portal.targetRegion];
+            if (targetRegion) {
+              player.regionName = portal.targetRegion;
+              player.areaNumber = 0;
+              
+              // Remove from current area
+              const playerIndex = area.players.indexOf(player);
+              if (playerIndex !== -1) {
+                area.players.splice(playerIndex, 1);
+              }
+
+              // Add to new region's first area
+              const targetArea = server.getArea(targetRegion, 0);
+              if (!targetArea.players.includes(player)) {
+                targetArea.players.push(player);
+              }
+
+              // Calculate relative position through portal
+              const relativeX = (player.position.x - portal.position.x) / portal.size.width;
+              const relativeY = (player.position.y - portal.position.y) / portal.size.height;
+
+              // Find target portal in new area
+              const targetPortal = targetArea.portals.find(p => p.targetRegion === area.regionName);
+              if (targetPortal) {
+                // Position player relative to target portal with configurable Y offset
+                const yOffset = portal.exitOffset.y;
+                player.position = {
+                  x: targetPortal.position.x + (relativeX * targetPortal.size.width),
+                  y: targetPortal.position.y + (relativeY * targetPortal.size.height) + yOffset
+                };
+              } else {
+                // Fallback to start zone if no return portal found
+                player.position = {
+                  x: targetArea.startZone.position.x + (targetArea.startZone.size.width / 2),
+                  y: targetArea.startZone.position.y + (targetArea.startZone.size.height / 2)
+                };
+              }
+
+              // Update client
+              player.socket.emit('areaChanged', {
+                areaData: targetArea.getAreaData(),
+                playerUpdate: player.getPlayerData()
+              });
+
+              // Handle room changes
+              player.socket.leave(`${region.regionName}-${area.areaNumber}`);
+              player.socket.join(`${targetRegion.regionName}-0`);
               break;
             }
           }

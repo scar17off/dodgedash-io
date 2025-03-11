@@ -2,6 +2,7 @@ const entityTypes = require('../entity/Enemies');
 const Pellet = require('../entity/Pellet');
 const Player = require('../player/Player');
 const presets = require('./presets.json');
+const RegionPortal = require('./RegionPortal');
 
 /**
  * Represents an area in the game.
@@ -69,6 +70,31 @@ class Area {
       size: { width: 50, height: this.size.height }
     };
     this.generateEntities(data.entities);
+
+    // Add portals if portal data is provided
+    this.portals = [];
+    if (data.portals && Array.isArray(data.portals)) {
+      this.portals = data.portals.map(portalData => 
+        new RegionPortal(
+          portalData.targetRegion,
+          portalData.position || { x: this.startZone.position.x, y: this.startZone.position.y },
+          portalData.size || { width: 250, height: 50 },
+          portalData.exitOffset || { y: 0 }
+        )
+      );
+    }
+    // For backwards compatibility with single portal
+    else if (areaNumber === 0 && data.portal) {
+      this.portals.push(
+        new RegionPortal(
+          data.portal.targetRegion,
+          {
+            x: this.startZone.position.x,
+            y: this.startZone.position.y
+          }
+        )
+      );
+    }
   }
 
   /**
@@ -195,6 +221,7 @@ class Area {
    * @property {Object} previousAreaZone.size - The size of the previous area zone.
    * @property {number} previousAreaZone.size.width - The width of the previous area zone.
    * @property {number} previousAreaZone.size.height - The height of the previous area zone.
+   * @property {Array<Object>} portals - The portals for the area.
    */
   getAreaData() {
     return {
@@ -206,7 +233,8 @@ class Area {
       startZone: this.startZone,
       finishZone: this.finishZone,
       nextAreaZone: this.nextAreaZone,
-      previousAreaZone: this.previousAreaZone
+      previousAreaZone: this.previousAreaZone,
+      portals: this.portals.map(portal => portal.getPortalData())
     };
   }
 }

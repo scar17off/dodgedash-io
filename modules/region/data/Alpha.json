@@ -1,0 +1,505 @@
+{
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "areas": {
+    "0": {
+      "preset": "Alpha",
+      "deathTimer": 10,
+      "portals": [
+        {
+          "targetRegion": "Teleport",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 250,
+            "height": 50
+          },
+          "exitOffset": {
+            "y": -100
+          }
+        }
+      ],
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 15,
+          "speed": 1.75,
+          "radius": 10
+        }
+      ]
+    },
+    "1": {
+      "preset": "Alpha",
+      "deathTimer": 10,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 15,
+          "speed": 2,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 4,
+          "speed": 3,
+          "radius": 15
+        }
+      ]
+    },
+    "2": {
+      "preset": "Alpha",
+      "deathTimer": 10,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 15,
+          "speed": 2.5,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 4,
+          "speed": 3.5,
+          "radius": 15
+        }
+      ]
+    },
+    "3": {
+      "preset": "Alpha",
+      "deathTimer": 15,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 15,
+          "speed": 2.5,
+          "radius": 20
+        },
+        {
+          "type": "Zigzag",
+          "amount": 4,
+          "speed": 3,
+          "radius": 15
+        },
+        {
+          "type": "Chaser",
+          "amount": 2,
+          "speed": 2,
+          "radius": 15
+        }
+      ]
+    },
+    "4": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 7,
+          "speed": 2,
+          "radius": 40
+        },
+        {
+          "type": "Zigzag",
+          "amount": 4,
+          "speed": 3,
+          "radius": 15
+        },
+        {
+          "type": "Chaser",
+          "amount": 4,
+          "speed": 3,
+          "radius": 15
+        }
+      ]
+    },
+    "5": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 7,
+          "speed": 2,
+          "radius": 40
+        },
+        {
+          "type": "Zigzag",
+          "amount": 5,
+          "speed": 3,
+          "radius": 20
+        },
+        {
+          "type": "Chaser",
+          "amount": 10,
+          "speed": 3,
+          "radius": 5
+        }
+      ]
+    },
+    "6": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 7,
+          "speed": 3,
+          "radius": 15
+        },
+        {
+          "type": "Zigzag",
+          "amount": 7,
+          "speed": 3,
+          "radius": 15
+        },
+        {
+          "type": "Chaser",
+          "amount": 7,
+          "speed": 3,
+          "radius": 15
+        }
+      ]
+    },
+    "7": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 20,
+          "speed": 1.5,
+          "radius": 20
+        },
+        {
+          "type": "Zigzag",
+          "amount": 1,
+          "speed": 7,
+          "radius": 10
+        },
+        {
+          "type": "Chaser",
+          "amount": 5,
+          "speed": 5,
+          "radius": 15
+        }
+      ]
+    },
+    "8": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 20,
+          "speed": 4,
+          "radius": 40
+        },
+        {
+          "type": "Chaser",
+          "amount": 8,
+          "speed": 4,
+          "radius": 20
+        }
+      ]
+    },
+    "9": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Normal",
+          "amount": 20,
+          "speed": 4,
+          "radius": 20
+        },
+        {
+          "type": "Chaser",
+          "amount": 10,
+          "speed": 4,
+          "radius": 20
+        },
+        {
+          "type": "Zigzag",
+          "amount": 1,
+          "speed": 7,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 2,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "10": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 5,
+          "speed": 1.5,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 5,
+          "speed": 1.5,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 3,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "11": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 7,
+          "speed": 1.5,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 7,
+          "speed": 2,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 3,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "12": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 10,
+          "speed": 2,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 10,
+          "speed": 2,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 3,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "13": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 20,
+          "speed": 1.5,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 3,
+          "speed": 1.5,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 20,
+          "speed": 1.5,
+          "radius": 10
+        }
+      ]
+    },
+    "14": {
+      "preset": "Alpha",
+      "deathTimer": 40,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 30,
+          "speed": 1,
+          "radius": 5
+        },
+        {
+          "type": "Zigzag",
+          "amount": 50,
+          "speed": 1,
+          "radius": 5
+        },
+        {
+          "type": "Mine",
+          "amount": 5,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "15": {
+      "preset": "Alpha",
+      "deathTimer": 40,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 35,
+          "speed": 1,
+          "radius": 5
+        },
+        {
+          "type": "Zigzag",
+          "amount": 60,
+          "speed": 1,
+          "radius": 5
+        },
+        {
+          "type": "Mine",
+          "amount": 6,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    },
+    "16": {
+      "preset": "Alpha",
+      "deathTimer": 40,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 20,
+          "speed": 1,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 20,
+          "speed": 1,
+          "radius": 10
+        },
+        {
+          "type": "Mine",
+          "amount": 10,
+          "speed": 0,
+          "radius": 10
+        }
+      ]
+    }
+  },
+  "17": {
+    "background": "black",
+    "deathTimer": 60,
+    "size": {
+      "width": 3000,
+      "height": 480
+    },
+    "entities": [
+      {
+        "type": "Teleporter",
+        "amount": 5,
+        "speed": 5,
+        "radius": 5
+      },
+      {
+        "type": "Zigzag",
+        "amount": 5,
+        "speed": 5,
+        "radius": 5
+      },
+      {
+        "type": "Mine",
+        "amount": 20,
+        "speed": 0,
+        "radius": 10
+      }
+    ]
+  },
+  "18": {
+    "background": "black",
+    "deathTimer": 60,
+    "size": {
+      "width": 3000,
+      "height": 480
+    },
+    "entities": [
+      {
+        "type": "Teleporter",
+        "amount": 10,
+        "speed": 1,
+        "radius": 10
+      },
+      {
+        "type": "Zigzag",
+        "amount": 10,
+        "speed": 1,
+        "radius": 10
+      },
+      {
+        "type": "Mine",
+        "amount": 2,
+        "speed": 0,
+        "radius": 30
+      },
+      {
+        "type": "Normal",
+        "amount": 8,
+        "speed": 1,
+        "radius": 10
+      }
+    ]
+  },
+  "19": {
+    "background": "black",
+    "deathTimer": 60,
+    "size": {
+      "width": 3000,
+      "height": 480
+    },
+    "bossArea": true,
+    "entities": [
+      {
+        "type": "Teleporter",
+        "amount": 20,
+        "speed": 1,
+        "radius": 10
+      },
+      {
+        "type": "Zigzag",
+        "amount": 2,
+        "speed": 1,
+        "radius": 10
+      },
+      {
+        "type": "Mine",
+        "amount": 2,
+        "speed": 0,
+        "radius": 50
+      },
+      {
+        "type": "Normal",
+        "amount": 40,
+        "speed": 0.5,
+        "radius": 5
+      }
+    ]
+  }
+}

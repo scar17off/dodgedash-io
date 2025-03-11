@@ -1,0 +1,90 @@
+{
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "areas": {
+    "0": {
+      "preset": "Alpha",
+      "deathTimer": 15,
+      "portals": [
+        {
+          "targetRegion": "Alpha",
+          "position": {
+            "x": 0,
+            "y": 430
+          },
+          "size": {
+            "width": 250,
+            "height": 50
+          },
+          "exitOffset": {
+            "y": 100
+          }
+        }
+      ],
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 8,
+          "speed": 1.5,
+          "radius": 15
+        }
+      ]
+    },
+    "1": {
+      "preset": "Alpha",
+      "deathTimer": 20,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 12,
+          "speed": 2,
+          "radius": 12
+        },
+        {
+          "type": "Normal",
+          "amount": 5,
+          "speed": 1,
+          "radius": 10
+        }
+      ]
+    },
+    "2": {
+      "preset": "Alpha",
+      "deathTimer": 25,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 15,
+          "speed": 2,
+          "radius": 10
+        },
+        {
+          "type": "Zigzag",
+          "amount": 3,
+          "speed": 2.5,
+          "radius": 12
+        }
+      ]
+    },
+    "3": {
+      "preset": "Alpha",
+      "deathTimer": 30,
+      "entities": [
+        {
+          "type": "Teleporter",
+          "amount": 20,
+          "speed": 2.5,
+          "radius": 8
+        },
+        {
+          "type": "Mine",
+          "amount": 3,
+          "speed": 0,
+          "radius": 15
+        }
+      ]
+    }
+  }
+} 

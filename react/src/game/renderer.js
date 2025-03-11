@@ -72,6 +72,31 @@ class Renderer {
       );
     }
 
+    // Draw portals if they exist
+    if (area.portals && area.portals.length > 0) {
+      for (const portal of area.portals) {
+        // Draw portal background
+        this.context.fillStyle = portal.color;
+        this.context.fillRect(
+          portal.position.x,
+          portal.position.y,
+          portal.size.width,
+          portal.size.height
+        );
+
+        // Draw portal text
+        this.context.fillStyle = 'white';
+        this.context.font = '20px Arial';
+        this.context.textAlign = 'center';
+        this.context.textBaseline = 'middle';
+        this.context.fillText(
+          `To ${portal.targetRegion}`,
+          portal.position.x + portal.size.width / 2,
+          portal.position.y + portal.size.height / 2
+        );
+      }
+    }
+
     // Draw grid if option is enabled
     if (this.options.grid) {
       const gridStep = 50;

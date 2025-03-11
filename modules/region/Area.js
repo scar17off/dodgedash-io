@@ -34,6 +34,30 @@ class Area {
     this.areaNumber = areaNumber;
     this.position = { x: 0, y: 0 };
     
+    // Initialize portals first
+    this.portals = [];
+    if (data.portals && Array.isArray(data.portals)) {
+      this.portals = data.portals.map(portalData => 
+        new RegionPortal(
+          portalData.targetRegion,
+          portalData.position || { x: this.startZone.position.x, y: this.startZone.position.y },
+          portalData.size || { width: 250, height: 50 },
+          portalData.exitOffset || { y: 0 }
+        )
+      );
+    }
+    else if (areaNumber === 0 && data.portal) {
+      this.portals.push(
+        new RegionPortal(
+          data.portal.targetRegion,
+          {
+            x: this.startZone.position.x,
+            y: this.startZone.position.y
+          }
+        )
+      );
+    }
+
     if (data.preset && presets.default[data.preset]) {
       const preset = presets.default[data.preset];
       this.size = preset.size || data.size;
@@ -69,32 +93,9 @@ class Area {
       position: { x: this.position.x, y: this.position.y },
       size: { width: 50, height: this.size.height }
     };
-    this.generateEntities(data.entities);
 
-    // Add portals if portal data is provided
-    this.portals = [];
-    if (data.portals && Array.isArray(data.portals)) {
-      this.portals = data.portals.map(portalData => 
-        new RegionPortal(
-          portalData.targetRegion,
-          portalData.position || { x: this.startZone.position.x, y: this.startZone.position.y },
-          portalData.size || { width: 250, height: 50 },
-          portalData.exitOffset || { y: 0 }
-        )
-      );
-    }
-    // For backwards compatibility with single portal
-    else if (areaNumber === 0 && data.portal) {
-      this.portals.push(
-        new RegionPortal(
-          data.portal.targetRegion,
-          {
-            x: this.startZone.position.x,
-            y: this.startZone.position.y
-          }
-        )
-      );
-    }
+    // Generate entities last
+    this.generateEntities(data.entities);
   }
 
   /**
@@ -155,19 +156,23 @@ class Area {
   }
 
   /**
-   * Gets a random position within the area.
-   * @param {number} entityRadius - The radius of the entity.
+   * Gets a random spawn position within the area.
+   * @param {number} radius - The radius of the entity.
    * @returns {Object} The random position.
-   * @property {number} x - The x-coordinate of the position.
-   * @property {number} y - The y-coordinate of the position.
    */
-  getRandomPosition(entityRadius) {
-    const margin = entityRadius;
+  getRandomPosition(radius) {
+    const margin = radius;
     let x, y;
     const isWithinZone = (zone) => {
       if(!zone) return false;
       return x >= zone.position.x && x <= zone.position.x + zone.size.width &&
-      y >= zone.position.y && y <= zone.position.y + zone.size.height;
+             y >= zone.position.y && y <= zone.position.y + zone.size.height;
+    }
+
+    const isWithinPortal = (portal) => {
+      if(!portal) return false;
+      return x >= portal.position.x && x <= portal.position.x + portal.size.width &&
+             y >= portal.position.y && y <= portal.position.y + portal.size.height;
     }
 
     do {
@@ -177,7 +182,8 @@ class Area {
       isWithinZone(this.startZone) ||
       isWithinZone(this.finishZone) ||
       isWithinZone(this.previousAreaZone) ||
-      isWithinZone(this.nextAreaZone)
+      isWithinZone(this.nextAreaZone) ||
+      (this.portals && this.portals.some(portal => isWithinPortal(portal)))  // Add null check
     );
     return { x, y };
   }

@@ -136,25 +136,53 @@ const chaserMovement = (entity, area) => {
 };
 
 const teleporterMovement = (entity, area) => {
+  // Initialize velocity if it doesn't exist
+  if (entity.velocity.x === 0 && entity.velocity.y === 0) {
+    const angle = Math.random() * 2 * Math.PI;
+    entity.velocity = {
+      x: Math.cos(angle),
+      y: Math.sin(angle)
+    };
+  }
+
+  // Normalize velocity to maintain constant speed
+  const velocityMagnitude = Math.sqrt(entity.velocity.x ** 2 + entity.velocity.y ** 2);
+  const normalizedVelocity = {
+    x: entity.velocity.x / velocityMagnitude,
+    y: entity.velocity.y / velocityMagnitude
+  };
+
+  // Initialize teleport timer
   if (!entity.teleportTimer) {
     entity.teleportTimer = 0;
   }
   entity.teleportTimer += 1;
-  if (entity.teleportTimer > 180) {
+
+  // Teleport in velocity direction
+  if (entity.teleportTimer > 30) { // Teleport every 0.5 seconds
     entity.teleportTimer = 0;
-    const teleportRadius = 50;
-    const angle = Math.random() * 2 * Math.PI;
-    let newX = entity.position.x + Math.cos(angle) * teleportRadius;
-    let newY = entity.position.y + Math.sin(angle) * teleportRadius;
-    ({ newX, newY } = checkCollisions(entity, area, newX, newY));
-    entity.position.x = newX;
-    entity.position.y = newY;
-  } else {
-    let newX = entity.position.x + entity.velocity.x;
-    let newY = entity.position.y + entity.velocity.y;
-    ({ newX, newY } = checkCollisions(entity, area, newX, newY));
-    entity.position.x = newX;
-    entity.position.y = newY;
+    const teleportDistance = 50;
+    
+    // Calculate new position using normalized velocity
+    let newX = entity.position.x + normalizedVelocity.x * teleportDistance;
+    let newY = entity.position.y + normalizedVelocity.y * teleportDistance;
+    
+    // Check boundaries and bounce
+    if (newX - entity.radius < area.position.x || newX + entity.radius > area.position.x + area.size.width) {
+      entity.velocity.x *= -1;
+      // Recalculate with new velocity
+      newX = entity.position.x + (entity.velocity.x / velocityMagnitude) * teleportDistance;
+    }
+    if (newY - entity.radius < area.position.y || newY + entity.radius > area.position.y + area.size.height) {
+      entity.velocity.y *= -1;
+      // Recalculate with new velocity
+      newY = entity.position.y + (entity.velocity.y / velocityMagnitude) * teleportDistance;
+    }
+
+    // Apply final position after potential bounces
+    const { newX: checkedX, newY: checkedY } = checkCollisions(entity, area, newX, newY);
+    entity.position.x = checkedX;
+    entity.position.y = checkedY;
   }
 };
 
